@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>25C02035_DataViz_Midterm · Urban Retail Sales HCMC 2025</title>
+<meta name="description" content="Trang trực quan hóa dữ liệu tương tác: 5 insight về doanh số bán lẻ tại TP.HCM năm 2025.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1f2328;--muted:#656d76;--line:#e6e4df;--accent:#6c8ebf;--accent-soft:#e8eef8;--pink:#ec8fad}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:64px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:var(--accent)}
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;background:rgba(247,246,243,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:6px;height:52px;overflow-x:auto;scrollbar-width:none}
+  nav .in::-webkit-scrollbar{display:none}
+  nav .brand{font-weight:700;font-size:14px;margin-right:10px;white-space:nowrap}
+  nav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 10px;border-radius:999px}
+  nav a:hover{background:#ecebe7;color:var(--ink)}
+  nav a.on{background:var(--ink);color:#fff}
+  /* hero */
+  header.hero{max-width:1100px;margin:0 auto;padding:44px 16px 10px}
+  .eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .hero h1{font-size:34px;line-height:1.2;margin:8px 0 12px;max-width:860px}
+  .hero p{color:var(--muted);max-width:780px;margin:0 0 14px;font-size:16px}
+  .who{display:flex;gap:10px;flex-wrap:wrap;font-size:13.5px}
+  .who span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  main{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+  section.block{padding:36px 0 8px;border-top:1px solid var(--line);margin-top:28px}
+  section.block:first-of-type{border-top:0}
+  .sec-h{font-size:24px;margin:0 0 6px}
+  /* shared */
+  .tag{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h2.ititle{font-size:23px;line-height:1.3;margin:6px 0 10px}
+  .lead{color:var(--muted);max-width:840px;margin:0 0 18px}
+  .step{font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:2px 9px;margin-right:6px;flex:none}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .full{grid-column:1/-1}
+  @media(max-width:860px){.grid{grid-template-columns:1fr!important}.hero h1{font-size:27px}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 8px;min-width:0}
+  .card h3{font-size:15px;margin:0 0 2px;display:flex;align-items:center;line-height:1.4}
+  .card p.sub{font-size:13px;color:var(--muted);margin:2px 0 8px}
+  .chart{width:100%;height:340px}
+  .note{font-size:12.5px;color:var(--muted);margin:4px 0 8px}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:6px;flex-wrap:wrap}
+  .toggle button{border:0;background:#fff;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--muted)}
+  .toggle button.on{background:var(--accent);color:#fff}
+  .reset{font-size:12.5px;color:var(--accent);cursor:pointer;background:none;border:0;padding:0;margin-left:8px;text-decoration:underline}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 12px;align-items:center;font-size:13px;color:var(--muted)}
+  .pills button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--muted)}
+  .pills button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;flex:1;min-width:170px}
+  .kpi b{display:block;font-size:20px}
+  .kpi span{font-size:12.5px;color:var(--muted)}
+  .kpi .lbl{font-size:12.5px;color:var(--muted)}
+  .kpi .val{font-size:15px;margin-top:2px}
+  .kpi .chg{font-weight:700}
+  .up{color:#4f9a7a}.down{color:#d9789b}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;font-size:14px}
+  select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .explain{margin-top:18px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:16px 18px}
+  .explain h3{margin:0 0 6px;font-size:15px}
+  .explain ol,.explain ul{margin:6px 0 0;padding-left:20px}
+  .explain li{margin-bottom:4px}
+  /* intro table */
+  table.cols{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.cols th,table.cols td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cols th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  table.cols code{background:#f1f0ec;padding:1px 6px;border-radius:5px;font-size:12.5px}
+  .defs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  @media(max-width:860px){.defs{grid-template-columns:1fr}}
+  .def{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:13.5px}
+  .def b{display:block;margin-bottom:2px}
+  /* story map + conclusion */
+  .map{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}
+  @media(max-width:860px){.map{grid-template-columns:1fr}}
+  .map a{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.4;transition:border-color .15s}
+  .map a:hover{border-color:var(--accent)}
+  .map a small{display:block;color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .concl{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.concl{grid-template-columns:1fr}}
+  .concl ol{padding-left:20px;margin:6px 0}
+  .concl li{margin-bottom:8px}
+  .question{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);color:#3f5f93;border-radius:999px;padding:5px 14px 5px 6px;font-size:14px;font-weight:600;margin-bottom:12px}
+  .question .q{background:var(--accent);color:#fff;border-radius:999px;padding:1px 9px;font-size:12px;letter-spacing:.04em}
+  .bridge{max-width:760px;margin:34px auto 6px;text-align:center;color:var(--ink);font-size:16.5px;line-height:1.65;position:relative;padding-top:34px}
+  .bridge:before{content:"";position:absolute;top:0;left:50%;width:1px;height:24px;background:var(--accent);opacity:.5}
+  .bridge .lbl{display:block;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+  .bridge b{color:#3f5f93}
+  .hook{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:12px;padding:14px 18px;max-width:800px;margin:6px 0 16px;font-size:15.5px}
+  .acts{display:grid;grid-template-columns:1fr 2.2fr 1fr;gap:12px;margin-top:14px}
+  @media(max-width:860px){.acts{grid-template-columns:1fr}}
+  .act{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .act h4{margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .act p{margin:0 0 8px;font-size:13.5px;color:var(--muted)}
+  .act .ch{display:flex;gap:8px;flex-wrap:wrap}
+  .act .ch a{flex:1;min-width:120px;text-decoration:none;color:var(--ink);background:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35;border:1px solid transparent}
+  .act .ch a:hover{border-color:var(--accent)}
+  .act .ch a small{display:block;color:var(--accent);font-weight:700;font-size:11px}
+  table.verdict{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  table.verdict th,table.verdict td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.verdict th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .vwrap{overflow-x:auto}
+  table.verdict{min-width:620px}
+  table.verdict td:first-child{white-space:nowrap}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  footer{max-width:1100px;margin:0 auto;padding:24px 16px 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<nav><div class="in">
+  <span class="brand">25C02035_DataViz_Midterm</span>
+  <a href="#intro">Giới thiệu</a>
+  <a href="#overview">Tổng quan</a>
+  <a href="#i1">1 · Quận</a>
+  <a href="#i2">2 · Electronics</a>
+  <a href="#i3">3 · Giảm giá</a>
+  <a href="#i4">4 · Giao hàng</a>
+  <a href="#i5">5 · Cuối tuần</a>
+  <a href="#conclusion">Kết luận</a>
+</div></nav>
+
+<header class="hero">
+  <div class="eyebrow">Midterm Project · Interactive Data Visualization</div>
+  <h1>Bán nhiều chưa chắc đã lời: 5 insight từ 240 giao dịch bán lẻ tại TP.HCM năm 2025</h1>
+  <div class="hook">Hãy hình dung bạn là quản lý một chuỗi 4 cửa hàng bán lẻ ở TP.HCM. Cuối năm 2025, sếp hỏi bạn một câu tưởng như đơn giản: <b>"Cửa hàng nào làm ăn tốt nhất?"</b> Câu trả lời hóa ra phụ thuộc vào việc bạn nhìn vào con số nào.</div>
+  <p>Trang web này phân tích bộ dữ liệu <i>Urban Retail Sales – HCMC 2025</i> để trả lời một câu hỏi xuyên suốt: <b>điều gì thực sự tạo ra lợi nhuận và sự hài lòng của khách hàng</b> trong một chuỗi bán lẻ 4 cửa hàng? Mọi biểu đồ đều tương tác được: rê chuột để xem chi tiết, bấm để lọc và làm nổi bật.</p>
+  <div class="who"><span>Họ tên: <b>Đinh Trịnh Thanh Vy</b></span><span>MSHV: <b>25C02035</b></span><span>Môn: Trực quan hóa dữ liệu</span></div>
+</header>
+
+<main>
+  <!-- ============ GIỚI THIỆU ============ -->
+  <section class="block" id="intro">
+    <div class="tag">Giới thiệu</div>
+    <h2 class="sec-h">Về bộ dữ liệu</h2>
+    <p class="lead">240 giao dịch bán lẻ từ ngày 04/01/2025 đến 30/12/2025 tại 4 cửa hàng (District 1, District 3, District 7, Thu Duc), gồm 5 danh mục và 20 sản phẩm. Mỗi giao dịch có 17 cột thông tin.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Các nhóm thông tin chính</h3>
+        <table class="cols">
+          <tr><th>Nhóm</th><th>Cột</th></tr>
+          <tr><td>Thời gian</td><td><code>Date</code> <code>Month</code> <code>Day_of_Week</code></td></tr>
+          <tr><td>Nơi bán, sản phẩm</td><td><code>Store</code> <code>Product_Category</code> <code>Product</code></td></tr>
+          <tr><td>Khách hàng</td><td><code>Customer_Type</code> (Student, Office Worker, Family, Tourist) <code>Payment_Method</code></td></tr>
+          <tr><td>Giá trị đơn</td><td><code>Quantity</code> <code>Unit_Price</code> <code>Discount</code> (%) <code>Revenue</code> <code>Cost</code> <code>Profit</code> (VND)</td></tr>
+          <tr><td>Trải nghiệm</td><td><code>Customer_Rating</code> (1–5) <code>Delivery_Days</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Làm sạch dữ liệu</h3>
+        <ul style="margin:6px 0;padding-left:20px;font-size:14px">
+          <li>Không có giao dịch trùng lặp. Doanh thu khớp với công thức số lượng × đơn giá × (1 − giảm giá).</li>
+          <li><b>6 giao dịch thiếu điểm đánh giá</b> và <b>4 giao dịch thiếu số ngày giao</b>. Các dòng này được giữ lại khi tính doanh thu và lợi nhuận, chỉ bị loại khi tính các chỉ số liên quan đến cột bị thiếu.</li>
+          <li>Có 6 giao dịch bị lỗ (lợi nhuận âm). Đây là dữ liệu thật, không phải lỗi, nên được giữ lại và phân tích ở Insight 2 và 3.</li>
+          <li>Vì mỗi tháng chỉ có 12–28 giao dịch, trang này ưu tiên so sánh giữa các nhóm hơn là kết luận xu hướng theo thời gian.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="def"><b>Doanh thu</b>Số tiền khách trả = số lượng × đơn giá × (1 − giảm giá).</div>
+      <div class="def"><b>Lợi nhuận</b>Doanh thu − giá vốn (Cost).</div>
+      <div class="def"><b>Biên lợi nhuận</b>Lợi nhuận ÷ doanh thu. Mỗi 100đ bán ra thì lời được bao nhiêu. Biên của một nhóm = tổng lợi nhuận ÷ tổng doanh thu.</div>
+    </div>
+  </section>
+
+  <!-- ============ TỔNG QUAN ============ -->
+  <section class="block" id="overview">
+    <div class="tag">Tổng quan</div>
+    <h2 class="sec-h">Bức tranh chung năm 2025</h2>
+    <p class="lead">Các chỉ số dưới đây cập nhật theo bộ lọc cửa hàng.</p>
+    <div class="pills" id="ov-pills">Cửa hàng:</div>
+    <div class="kpis" id="ov-kpis"></div>
+    <div class="grid">
+      <div class="card full">
+        <h3>Doanh thu và lợi nhuận theo tháng</h3>
+        <p class="sub">Cột là doanh thu, đường là lợi nhuận (triệu VND). Bấm vào legend để ẩn hoặc hiện. Kéo thanh bên dưới để phóng to một khoảng thời gian.</p>
+        <div id="ov-month" class="chart" style="height:340px"></div>
+        <p class="note">Mỗi tháng chỉ có 12–28 giao dịch, nên một vài đơn lớn có thể làm cột tăng vọt (ví dụ tháng 9 và tháng 10 có hai đơn trên 5 triệu). Biểu đồ này dùng để định hướng, không dùng để kết luận mùa vụ.</p>
+      </div>
+    </div>
+    <h3 style="margin:26px 0 4px;font-size:16px">Câu chuyện gồm 3 hồi</h3>
+    <p class="note" style="margin:0">Mỗi insight trả lời một câu hỏi, và câu trả lời đó lại mở ra câu hỏi tiếp theo. Bấm vào một chương để nhảy đến.</p>
+    <div class="acts">
+      <div class="act"><h4>Hồi 1 · Ảo giác doanh thu</h4><p>Bảng xếp hạng doanh thu nói một đằng, lợi nhuận nói một nẻo.</p>
+        <div class="ch"><a href="#i1"><small>Chương 1</small>Cửa hàng nào thực sự làm ăn tốt nhất?</a></div></div>
+      <div class="act"><h4>Hồi 2 · Đi tìm nguyên nhân</h4><p>Lần theo dấu vết: từ sản phẩm, đến giảm giá, đến trải nghiệm của khách.</p>
+        <div class="ch"><a href="#i2"><small>Chương 2</small>Vì sao hàng bán chạy nhất lại lời ít nhất?</a><a href="#i3"><small>Chương 3</small>Giảm giá có đáng không?</a><a href="#i4"><small>Chương 4</small>Điều gì liên quan nhất đến sự hài lòng?</a></div></div>
+      <div class="act"><h4>Hồi 3 · Hiểu khách hàng</h4><p>Khách đến lúc nào, ở đâu, là ai, để đặt nguồn lực đúng chỗ.</p>
+        <div class="ch"><a href="#i5"><small>Chương 5</small>Cuối tuần, cửa hàng nào đông khách?</a></div></div>
+    </div>
+  </section>
+
+<div class="bridge"><span class="lbl">Hồi 1 · Ảo giác doanh thu</span>Toàn chuỗi lãi <b>47,2 triệu</b> trên 187,8 triệu doanh thu. Nếu chỉ nhìn bảng xếp hạng doanh thu, District 1 là "ngôi sao" với 55,7 triệu. Nhưng <b>doanh thu có phải thước đo đúng?</b></div>
+  <section class="block" id="i1">
+<div class="question"><span class="q">Chương 1</span>Cửa hàng nào thực sự làm ăn tốt nhất?</div>
+
+  <div class="tag">Insight 1 · Quận × Danh mục sản phẩm</div>
+  <h2 class="ititle">District 1 bán được nhiều nhất nhưng Thu Duc lời nhiều nhất, vì mỗi quận bán một cơ cấu sản phẩm khác nhau</h2>
+  <p class="lead">Biên lợi nhuận (<span style="white-space:nowrap">= lợi nhuận ÷ doanh thu</span>, tức mỗi 100đ bán ra thì lời được bao nhiêu) gắn với <b>loại sản phẩm</b> nhiều hơn là với <b>quận</b>: mỗi danh mục có biên gần như giống nhau ở cả 4 quận. Vì vậy, quận nào bán nhiều Electronics (biên thấp) thì biên lợi nhuận chung của quận đó thấp hơn.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h3>Cơ cấu theo danh mục của mỗi quận (100%)</h3>
+      <p class="sub">Quận xếp theo tổng doanh thu. Bấm vào một thanh để làm nổi bật quận đó ở heatmap.</p>
+      <div class="toggle" id="i1-t1">
+        <button data-m="rev" class="on">Doanh thu</button>
+        <button data-m="prof">Lợi nhuận</button>
+      </div>
+      <button class="reset" id="i1-reset" hidden>Bỏ chọn</button>
+      <div id="i1-stack" class="chart"></div>
+      <p class="note">Chuyển sang "Lợi nhuận": ở District 1, Electronics chiếm 53% doanh thu nhưng chỉ 35% lợi nhuận.</p>
+    </section>
+
+    <section class="card">
+      <h3>Heatmap Quận × Danh mục</h3>
+      <p class="sub">Màu càng đậm thì giá trị càng cao. Rê chuột lên ô để xem chi tiết.</p>
+      <div class="toggle" id="i1-t2">
+        <button data-m="margin" class="on">Biên lợi nhuận %</button>
+        <button data-m="rev">Doanh thu</button>
+        <button data-m="prof">Lợi nhuận</button>
+      </div>
+      <div id="i1-heat" class="chart"></div>
+      <p class="note">Ở chế độ "Biên %", màu gần như giống nhau theo từng cột: mỗi loại sản phẩm có biên ổn định ở cả 4 quận.</p>
+    </section>
+  </div>
+
+  <div class="explain">
+    <h3>Giải thích</h3>
+    <ul>
+      <li><b>Biểu đồ cho thấy gì:</b> District 1 có doanh thu cao nhất (55,7tr) nhưng biên thấp nhất (21,5%). Thu Duc doanh thu thấp hơn (53,2tr) nhưng lợi nhuận cao nhất (14,0tr).</li>
+      <li><b>Pattern:</b> 53% doanh thu của District 1 đến từ Electronics, nhóm chỉ lời 14–17% ở mọi quận. Thu Duc bán mạnh Sports và Fashion, hai nhóm lời khoảng 30–35%, và chúng tạo ra 68% lợi nhuận của quận này.</li>
+      <li><b>Ý nghĩa:</b> Khác biệt về biên lợi nhuận giữa các quận được giải thích phần lớn bởi <i>bán cái gì</i> (cơ cấu sản phẩm), hơn là <i>bán ở đâu</i>. Một hướng District 1 có thể thử là tăng tỷ trọng Fashion và Sports để bớt phụ thuộc vào Electronics.</li>
+    </ul>
+  </div>
+<p class="note" style="margin-top:12px"><b>Dữ liệu sử dụng:</b> Store, Product_Category, Revenue, Profit. <b>Vì sao chọn các biểu đồ này:</b> Stacked bar 100% để so sánh cơ cấu khi tổng của các quận khác nhau; heatmap để so sánh biên lợi nhuận trên lưới 2 chiều Quận × Danh mục.</p>
+</section>
+<div class="bridge"><span class="lbl">Hồi 2 · Đi tìm nguyên nhân</span>District 1 lời ít vì hơn một nửa doanh thu đến từ Electronics. Vậy câu hỏi tiếp theo là: <b>vì sao chính nhóm hàng bán chạy nhất lại kéo lợi nhuận xuống?</b></div>
+  <section class="block" id="i2">
+<div class="question"><span class="q">Chương 2</span>Vì sao nhóm hàng bán chạy nhất lại lời ít nhất?</div>
+
+  <div class="tag">Insight 2 · Danh mục → Sản phẩm</div>
+  <h2 class="ititle">Electronics lời thấp ở mọi sản phẩm: tai nghe bán chạy thứ 2 nhưng lời ít nhất trong 20 sản phẩm</h2>
+  <p class="lead">Electronics chiếm doanh thu lớn nhất, nhưng cả 4 sản phẩm của nhóm này đều nằm ở 4 vị trí cuối bảng xếp hạng biên lợi nhuận (<span style="white-space:nowrap">= lợi nhuận ÷ doanh thu</span>, tức mỗi 100đ bán ra thì lời được bao nhiêu). Lời giải thích hợp lý nhất là <b>giá vốn cao so với giá bán</b>, không phải do nhóm này được giảm giá nhiều hơn.</p>
+
+  <div class="kpis">
+    <div class="kpi"><b>34% → 21%</b><span>Electronics: tỷ trọng doanh thu → tỷ trọng lợi nhuận</span></div>
+    <div class="kpi"><b>4 / 4</b><span>Sản phẩm Electronics nằm ở 4 vị trí biên lợi nhuận thấp nhất</span></div>
+    <div class="kpi"><b>2,7tr vs 6,3tr</b><span>Lợi nhuận Tai nghe (doanh thu 21,8tr) và Áo khoác (doanh thu 19,3tr)</span></div>
+    <div class="kpi"><b>4 / 6</b><span>Giao dịch bị lỗ thuộc nhóm Electronics</span></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h3><span class="step">1</span>Treemap: kích thước = doanh thu, màu = biên lợi nhuận</h3>
+      <p class="sub">Ô càng to thì bán càng nhiều. Màu càng đỏ thì lời càng ít, càng xanh thì lời càng nhiều. Bấm vào một danh mục để phóng to, bấm vào thanh điều hướng phía trên để quay lại.</p>
+      <div class="toggle" id="i2-tSize">
+        <button data-m="rev" class="on">Kích thước: Doanh thu</button>
+        <button data-m="prof">Kích thước: Lợi nhuận</button>
+      </div>
+      <div id="i2-tree" class="chart"></div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#656d76;margin-top:4px">Biên thấp 12%<span style="flex:0 0 200px;height:10px;border-radius:5px;background:linear-gradient(90deg,#f09696,#f8c8b4,#faf3e8,#c8dcf4,#8cb2e6)"></span>36% Biên cao</div>
+      <p class="note">Chuyển sang "Lợi nhuận": khối Electronics thu nhỏ rõ rệt, còn Fashion phình to lên.</p>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">2</span>Xếp hạng 20 sản phẩm theo biên lợi nhuận</h3>
+      <p class="sub">Màu theo danh mục. Rê chuột để xem chi tiết. Bấm vào legend để ẩn hoặc hiện từng danh mục.</p>
+      <div class="toggle" style="visibility:hidden"><button>.</button></div>
+      <div id="i2-rank" class="chart"></div>
+    </section>
+
+    <section class="card full">
+      <h3><span class="step">3</span>Đào sâu: lời thấp vì giảm giá nhiều hay vì giá vốn cao?</h3>
+      <p class="sub">So sánh biên lợi nhuận <b>nếu bán đúng giá niêm yết</b> với biên <b>thực tế sau giảm giá</b>. Đường hồng là mức giảm giá trung bình (trục phải).</p>
+      <div id="i2-why" class="chart" style="height:320px"></div>
+      <p class="note">Electronics có mức giảm giá trung bình (12,3%) gần bằng các nhóm khác (10,8–12,6%), nhưng biên theo giá niêm yết chỉ 25,8%. Vì "đệm" lợi nhuận mỏng, mỗi đợt giảm giá ăn mất phần lớn lợi nhuận.</p>
+    </section>
+
+    <section class="card full">
+      <h3><span class="step">4</span>Giảm giá bao nhiêu thì bắt đầu lỗ?</h3>
+      <p class="sub">Mỗi chấm là một giao dịch: trục ngang là mức giảm giá, trục dọc là biên lợi nhuận của giao dịch đó. Màu theo danh mục, chấm viền đỏ là giao dịch lỗ. Bấm vào legend để ẩn hoặc hiện danh mục, kéo chọn một vùng để phóng to.</p>
+      <div id="i2-scat" class="chart" style="height:360px"></div>
+      <p class="note">Chấm Electronics (xanh dương) nằm thấp nhất ở mọi mức giảm giá. Tất cả 6 giao dịch lỗ đều có giảm giá từ 25% trở lên, và 4 trong số đó là Electronics. Các chấm được dịch ngang ngẫu nhiên một chút để không chồng lên nhau.</p>
+    </section>
+  </div>
+
+  <div class="explain">
+    <h3>Giải thích</h3>
+    <ol>
+      <li><b>Quan sát:</b> Electronics là danh mục có doanh thu cao nhất (63,8tr, 34% tổng doanh thu) nhưng biên lợi nhuận thấp nhất (15,3%). Trên treemap, đây là khối to nhất nhưng có màu đỏ nhạt nhất.</li>
+      <li><b>So sánh ở cấp sản phẩm:</b> Đây không phải chuyện một sản phẩm kéo cả nhóm xuống. Cả 4 sản phẩm Electronics đều nằm ở 4 vị trí cuối bảng (12–17%). Wireless Earbuds bán được 21,8tr (cao thứ 2) nhưng chỉ lời 2,7tr (12,3%). Jacket bán ít hơn (19,3tr) mà lời gấp 2,3 lần (6,3tr).</li>
+      <li><b>Đào sâu:</b> Nếu bán đúng giá niêm yết, Electronics chỉ lời 25,8%, so với 32–42% ở các nhóm khác. Mức giảm giá của Electronics cũng không cao hơn. Vì vậy, lời giải thích hợp lý là <b>giá vốn cao so với giá bán</b>. Muốn khẳng định sâu hơn (ví dụ do giá nhập hay do chính sách định giá) thì cần thêm dữ liệu mà bộ dữ liệu này không có. Vì phần lời vốn mỏng, các đơn giảm từ 25% trở lên dễ bị lỗ: 4 trong 6 giao dịch lỗ của cả chuỗi thuộc nhóm Electronics (Power Bank ×2, Bluetooth Speaker, Wireless Earbuds), như biểu đồ 4 cho thấy.</li>
+      <li><b>Ý nghĩa:</b> Electronics nên được dùng để kéo khách và tạo doanh thu, không nên dựa vào nó để tạo lợi nhuận. Một số hướng đáng thử: thử nghiệm mức trần giảm giá thấp hơn cho Electronics (ví dụ 15%) và theo dõi tác động lên doanh số và lợi nhuận, xem lại giá nhập, và bán kèm sản phẩm Fashion/Sports có biên cao. Mức 15% là giả thuyết cần kiểm chứng, không phải ngưỡng tối ưu đã được chứng minh.</li>
+    </ol>
+  </div>
+<p class="note" style="margin-top:12px"><b>Dữ liệu sử dụng:</b> Product_Category, Product, Revenue, Profit, Cost, Unit_Price, Quantity, Discount. <b>Vì sao chọn các biểu đồ này:</b> Treemap cho dữ liệu phân cấp (danh mục → sản phẩm) với 2 chỉ số cùng lúc (diện tích = doanh thu, màu = biên); bar xếp hạng để so sánh chính xác; scatter để xem quan hệ giữa giảm giá và biên của từng giao dịch.</p>
+</section>
+<div class="bridge"><span class="lbl">Tiếp theo</span>Electronics có phần lời mỏng, nên mỗi lần giảm giá đều rất "đắt". Nhưng nếu giảm giá giúp khách hài lòng hơn thì có lẽ vẫn đáng. <b>Liệu có đúng như vậy?</b></div>
+  <section class="block" id="i3">
+<div class="question"><span class="q">Chương 3</span>Giảm giá để bán được nhiều hơn có đáng không?</div>
+
+  <div class="tag">Insight 3 · Giảm giá và sự hài lòng</div>
+  <h2 class="ititle">Mức giảm giá cao đi kèm điểm đánh giá thấp hơn, kể cả khi đã tính đến tốc độ giao hàng</h2>
+  <p class="lead">Thông thường ta nghĩ giảm giá thì khách vui hơn. Trong bộ dữ liệu này thì ngược lại: đơn không giảm giá có điểm trung bình cao nhất, và mối liên hệ ngược chiều giữa mức giảm giá và điểm đánh giá vẫn còn khi đã tính đến tốc độ giao hàng, cửa hàng, danh mục và loại khách.</p>
+
+  <div class="kpis" id="i3-kpis"></div>
+
+  <div class="controls">
+    <label for="i3-cat">Lọc danh mục:</label>
+    <select id="i3-cat"><option value="all">Tất cả danh mục</option></select>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h3>Điểm đánh giá trung bình theo mức giảm giá</h3>
+      <p class="sub">Thanh lỗi = khoảng tin cậy 95%. Số trên thanh là số giao dịch (n). Thanh nhạt màu: n &lt; 10, cần thận trọng.</p>
+      <div class="toggle" id="i3-tAxis">
+        <button data-m="zero" class="on">Trục từ 0</button>
+        <button data-m="zoom">Phóng to (từ 3)</button>
+      </div>
+      <div id="i3-bar" class="chart"></div>
+      <p class="note">Mặc định trục bắt đầu từ 0 để không phóng đại chênh lệch. Chế độ "Phóng to" chỉ để nhìn rõ xu hướng.</p>
+    </section>
+
+    <section class="card">
+      <h3>Kiểm chứng: có phải do giao hàng chậm?</h3>
+      <p class="sub">Mỗi đường là một nhóm số ngày giao. Nếu giảm giá không ảnh hưởng thì các đường sẽ nằm ngang.</p>
+      <div class="toggle" style="visibility:hidden"><button>.</button></div>
+      <div id="i3-line" class="chart"></div>
+      <p class="note">Cả 4 đường đều đi xuống: ở cùng tốc độ giao hàng, đơn giảm giá sâu vẫn bị chấm điểm thấp hơn.</p>
+    </section>
+  </div>
+
+  <div class="explain">
+    <h3>Giải thích</h3>
+    <ul>
+      <li><b>Biểu đồ cho thấy gì:</b> Đơn không giảm giá được trung bình 4,44 điểm. Đơn giảm 5% được 4,26, giảm 10–15% khoảng 4,15, còn giảm từ 20% trở lên khoảng 3,9 điểm. Hệ số tương quan là −0,39. Xu hướng này <b>không giảm đều ở từng mức</b>: mức 15% nhỉnh hơn 10%, mức 25% nhỉnh hơn 20%. Vì vậy, nên đọc đây là xu hướng chung theo nhóm (0–5%, 10–15%, từ 20%) chứ không phải từng nấc giảm giá.</li>
+      <li><b>Đào sâu:</b> Giao hàng chậm làm điểm thấp rõ rệt (tương quan −0,68), nên mình kiểm tra lại bằng cách so sánh trong cùng số ngày giao. Xu hướng vẫn còn nguyên (tương quan riêng phần −0,41), và cũng xuất hiện ở cả 5 danh mục. Mình chạy thêm <b>hồi quy tuyến tính</b> với điểm đánh giá là biến phụ thuộc, các biến giải thích gồm mức giảm giá, số ngày giao, cửa hàng, danh mục và loại khách (n = 231, R² = 0,57). Hệ số của mức giảm giá là −0,014 (p &lt; 0,001): khi các yếu tố khác như nhau, mỗi 10 điểm % giảm giá đi kèm điểm đánh giá thấp hơn khoảng 0,14. Cửa hàng, danh mục và loại khách đều không có ý nghĩa thống kê.</li>
+      <li><b>Ý nghĩa:</b> Giảm giá sâu làm mất lợi nhuận (biên rơi từ ~34% xuống ~14% ở mức 20–25%), và trong dữ liệu này cũng không đi kèm khách hài lòng hơn. Điều này gợi ý cửa hàng nên thận trọng với giảm giá sâu, và nên kiểm chứng bằng thử nghiệm thực tế trước khi thay đổi chính sách.</li>
+      <li><b>Lưu ý:</b> Đây là phân tích quan sát, chưa chứng minh giảm giá <i>làm</i> khách kém hài lòng. Một giải thích khả dĩ khác: hàng bị giảm giá sâu có thể vốn là hàng tồn hoặc kém hấp dẫn. Mức 30% và 35% chỉ có 4 và 3 giao dịch có điểm đánh giá (mức 30% có 5 giao dịch, 1 giao dịch thiếu điểm), nên không khái quát từ hai mức này. Tổng cộng 6 giao dịch thiếu điểm đánh giá đã được loại ra.</li>
+    </ul>
+  </div>
+<p class="note" style="margin-top:12px"><b>Dữ liệu sử dụng:</b> Discount, Customer_Rating, Delivery_Days, Product_Category, Store, Customer_Type. <b>Vì sao chọn các biểu đồ này:</b> Bar có khoảng tin cậy để so sánh giá trị trung bình giữa các nhóm và thể hiện độ chắc chắn; line chart theo nhóm ngày giao để kiểm tra yếu tố gây nhiễu.</p>
+</section>
+<div class="bridge"><span class="lbl">Tiếp theo</span>Giảm giá sâu không đi kèm khách hài lòng hơn. Trong khi đó, có một yếu tố khác liên hệ với điểm đánh giá mạnh hơn nhiều: <b>thời gian khách phải chờ nhận hàng.</b></div>
+  <section class="block" id="i4">
+<div class="question"><span class="q">Chương 4</span>Nếu không phải giảm giá, điều gì liên quan nhất đến sự hài lòng?</div>
+
+  <div class="tag">Insight 4 · Giao hàng × Đánh giá × Quận</div>
+  <h2 class="ititle">Thu Duc có điểm đánh giá thấp nhất, đồng thời có thời gian giao hàng dài nhất: 2/3 số đơn phải chờ từ 3 ngày</h2>
+  <p class="lead">Khi so sánh các đơn có <b>cùng số ngày giao</b>, điểm đánh giá ở 4 quận gần như bằng nhau. Phần lớn khác biệt giữa các quận đi cùng với <b>tốc độ giao hàng</b>, yếu tố có liên hệ mạnh nhất với điểm đánh giá trong bộ dữ liệu này, nên đây là hướng nên ưu tiên điều tra.</p>
+
+  <div class="kpis">
+    <div class="kpi"><b>−0,68</b><span>Tương quan số ngày giao ↔ điểm đánh giá (mạnh nhất trong dữ liệu)</span></div>
+    <div class="kpi"><b>15% vs 67%</b><span>Tỷ lệ đơn giao từ 3 ngày trở lên: District 1 và Thu Duc</span></div>
+    <div class="kpi"><b>0% vs 69%</b><span>Tỷ lệ đơn bị chấm dưới 3,8 điểm: giao 1 ngày và giao 4 ngày</span></div>
+  </div>
+
+  <div class="pills" id="i4-pills">Làm nổi bật quận:</div>
+
+  <div class="grid">
+    <section class="card">
+      <h3><span class="step">1</span>Quan sát: điểm đánh giá trung bình theo quận</h3>
+      <p class="sub">Thang điểm từ 1 đến 5, nên trục bắt đầu từ 1. Bấm vào một cột để làm nổi bật quận đó ở các biểu đồ khác.</p>
+      <div id="i4-rating" class="chart"></div>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">2</span>So sánh: mỗi quận giao hàng nhanh hay chậm?</h3>
+      <p class="sub">Phân bố số ngày giao của từng quận. Màu càng hồng thì giao càng chậm.</p>
+      <div id="i4-mix" class="chart"></div>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">3</span>Đào sâu: cùng số ngày giao, điểm có khác nhau không?</h3>
+      <p class="sub">Mỗi đường là một quận. Nếu các đường gần như chồng lên nhau thì bản thân quận ít liên quan đến điểm. Điểm hình thoi là ô có dưới 5 đơn, ô dưới 3 đơn được ẩn đi.</p>
+      <div id="i4-lines" class="chart"></div>
+      <p class="note">Các đường gần như trùng nhau: đơn giao 2 ngày ở quận nào cũng được khoảng 4,1–4,2 điểm. Ô mẫu nhỏ: Thu Duc giao 1 ngày (5 đơn), District 7 giao 4 ngày (5 đơn). District 3 chỉ có 1 đơn giao 4 ngày nên bị ẩn, District 1 không có đơn giao 4 ngày. Rê chuột để xem số đơn của từng điểm.</p>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">4</span>Giao chậm làm tăng số khách không hài lòng</h3>
+      <p class="sub">Tỷ lệ đơn bị chấm dưới 3,8 điểm (nhóm điểm thấp nhất) theo số ngày giao.</p>
+      <div id="i4-low" class="chart"></div>
+    </section>
+  </div>
+
+  <div class="explain">
+    <h3>Giải thích</h3>
+    <ol>
+      <li><b>Quan sát:</b> Thu Duc có điểm đánh giá trung bình thấp nhất (3,97), District 1 cao nhất (4,28).</li>
+      <li><b>So sánh:</b> District 1 giao trong 1–2 ngày cho 85% số đơn, chỉ 15% phải chờ từ 3 ngày trở lên. Ở Thu Duc con số này là 67%, kể cả 7 đơn phải chờ 4 ngày.</li>
+      <li><b>Đào sâu:</b> Khi xét các đơn có cùng số ngày giao, điểm của 4 quận gần như bằng nhau (giao 2 ngày: 4,13–4,24). Trong toàn bộ dữ liệu, không có đơn giao 1 ngày nào bị chấm dưới 3,8 điểm, trong khi 69% đơn giao 4 ngày rơi vào nhóm này. Hồi quy tuyến tính cho kết quả tương tự: nếu chỉ so theo quận, Thu Duc thấp hơn District 1 khoảng 0,31 điểm. Khi đưa thêm số ngày giao vào mô hình, khoảng cách này còn khoảng 0,05 điểm và không còn ý nghĩa thống kê (p = 0,18 trong mô hình có kiểm soát thêm giảm giá, danh mục và loại khách).</li>
+      <li><b>Ý nghĩa:</b> Rút ngắn thời gian giao hàng ở Thu Duc và District 7 (ví dụ ưu tiên giao trong 2 ngày) là hướng cải thiện điểm đánh giá đáng thử nhất, kèm theo dõi điểm trước và sau khi thay đổi để kiểm chứng.</li>
+    </ol>
+    <ul style="color:var(--muted);font-size:13.5px;margin-top:10px">
+      <li><b>Hạn chế:</b> Đã loại 9 giao dịch thiếu điểm đánh giá hoặc thiếu số ngày giao (còn lại 231). Mỗi ô quận × số ngày giao chỉ có từ 1 đến 33 đơn, nên các con số chỉ mang tính tham khảo. Bộ dữ liệu không có thông tin về chất lượng phục vụ, thái độ nhân viên hay trải nghiệm tại cửa hàng, nên chưa thể loại trừ các yếu tố này. Đây là tương quan, chưa chứng minh nhân quả.</li>
+    </ul>
+  </div>
+<p class="note" style="margin-top:12px"><b>Dữ liệu sử dụng:</b> Store, Delivery_Days, Customer_Rating. <b>Vì sao chọn các biểu đồ này:</b> Bar so sánh điểm giữa các quận; stacked bar 100% cho phân bố số ngày giao; line chart mỗi quận một đường để so sánh trong cùng số ngày giao.</p>
+</section>
+<div class="bridge"><span class="lbl">Hồi 3 · Hiểu khách hàng</span>Ta đã biết điều gì tạo ra lợi nhuận và điều gì làm khách hài lòng. Mảnh ghép cuối cùng là <b>hiểu khách hàng: họ mua lúc nào, ở đâu, và là ai</b>, để đặt nguồn lực vào đúng chỗ.</div>
+  <section class="block" id="i5">
+<div class="question"><span class="q">Chương 5</span>Khách hàng mua lúc nào, ở đâu, và họ là ai?</div>
+
+  <div class="tag">Insight 5 · Thời điểm mua × Quận × Loại khách</div>
+  <h2 class="ititle">Cuối tuần, doanh thu tăng ở District 1 nhưng giảm mạnh ở Thu Duc</h2>
+  <p class="lead">Thu Duc là quận bán mạnh nhất vào ngày thường nhưng doanh thu mỗi ngày cuối tuần giảm 68%. District 1 thì ngược lại, cuối tuần còn bán tốt hơn, và sinh viên chiếm phần lớn giao dịch cuối tuần ở đây. Tất cả số liệu được tính <b>theo trung bình mỗi ngày</b> (chia cho 5 ngày thường và 2 ngày cuối tuần) để so sánh công bằng.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h3><span class="step">1</span>Quan sát: doanh thu mỗi ngày theo quận</h3>
+      <p class="sub">Đường đi lên nghĩa là cuối tuần bán tốt hơn. Bấm vào một quận để xem chi tiết ở bước 2 và 3.</p>
+      <div id="i5-slope" class="chart"></div>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">2</span>Ai tạo ra sự khác biệt?</h3>
+      <p class="sub">Doanh thu mỗi ngày theo loại khách của <b id="i5-selName">District 1</b>.</p>
+      <div class="pills" id="i5-pills"></div>
+      <div id="i5-ctype" class="chart" style="height:308px"></div>
+    </section>
+
+    <section class="card full">
+      <h3><span class="step">3</span>Đào sâu: giảm vì ít khách hơn hay vì mỗi khách mua ít hơn?</h3>
+      <p class="sub">Doanh thu/ngày = Số đơn/ngày × Giá trị đơn trung bình. Các thẻ dưới đây tách hai yếu tố này cho <b id="i5-selName2">District 1</b>.</p>
+      <div class="kpis" id="i5-kpis"></div>
+      <div class="grid" style="gap:12px">
+        <div id="i5-share" class="chart" style="height:280px"></div>
+        <div id="i5-cat" class="chart" style="height:280px"></div>
+      </div>
+      <p class="note">Trái: tỷ lệ giao dịch rơi vào cuối tuần của từng loại khách (toàn chuỗi). Đường đứt là tỷ lệ "trung lập" 2/7 ≈ 28,6%. Phải: cơ cấu danh mục theo số đơn của quận đang chọn.</p>
+    </section>
+  </div>
+
+  <div class="explain">
+    <h3>Giải thích</h3>
+    <ol>
+      <li><b>Quan sát:</b> Tính trung bình mỗi ngày, toàn chuỗi bán được 28,8tr vào ngày thường nhưng chỉ 22,0tr vào cuối tuần (−24%). Mức giảm này không đều giữa các quận: District 1 (+12%) và District 3 (+14%) tăng, District 7 (−29%) và đặc biệt Thu Duc (−68%) giảm.</li>
+      <li><b>Cơ cấu khách khác nhau thế nào:</b> Sinh viên (35% giao dịch vào cuối tuần) và khách du lịch (33%) là nhóm mua cuối tuần nhiều nhất. Gia đình chỉ có 16%, trái với suy nghĩ "gia đình đi mua sắm cuối tuần". Ở District 1, doanh thu từ sinh viên tăng từ 1,8tr lên 4,5tr/ngày vào cuối tuần (gấp 2,5 lần). Sinh viên chiếm 11/21 đơn cuối tuần của quận này. Lưu ý: dữ liệu chỉ cho thấy cơ cấu giao dịch khác nhau, chưa chứng minh sinh viên là nguyên nhân khiến doanh thu tăng. Dữ liệu cũng không có mã khách hàng, nên không biết có phải cùng một người chuyển từ quận này sang quận khác hay không.</li>
+      <li><b>Đào sâu Thu Duc:</b> Doanh thu giảm ở <i>mọi</i> loại khách, nên không phải do mất một nhóm khách cụ thể. Mức giảm đến từ hai thành phần cộng lại: số đơn/ngày giảm 35% (9,2 → 6,0), và giá trị đơn trung bình giảm 51% (1,03tr → 0,50tr). Ngày thường Thu Duc bán nhiều Electronics và Sports giá cao (12 đơn Electronics), còn cuối tuần chủ yếu là đồ ăn uống và đồ nhỏ (chỉ 1 đơn Electronics).</li>
+      <li><b>Ý nghĩa:</b> Một cách giải thích khả dĩ là Thu Duc phục vụ nhu cầu mua sắm "có mục đích" vào ngày thường, còn khu trung tâm thu hút khách đi chơi cuối tuần. Đây là giả thuyết cần thêm dữ liệu để kiểm chứng. Về vận hành, chuỗi có thể thử điều chỉnh lịch nhân sự và khuyến mãi cuối tuần theo từng quận (tăng ở District 1, giảm ở Thu Duc) rồi theo dõi kết quả.</li>
+    </ol>
+    <ul style="color:var(--muted);font-size:13.5px;margin-top:10px">
+      <li><b>Kiểm tra độ vững:</b> (1) Bỏ 3 đơn lớn nhất ngày thường của Thu Duc (5,3tr, 3,7tr, 3,6tr), doanh thu ngày thường vẫn là 6,9tr/ngày so với 3,0tr cuối tuần (−57%). (2) Năm 2025 có 261 ngày thường và 104 ngày cuối tuần, tỷ lệ đúng bằng 5:2, nên chia cho 5 và 2 tương đương chia theo số ngày lịch thực tế. (3) Tách riêng hai nửa năm: Thu Duc giảm ở cả nửa đầu (−70%) lẫn nửa sau (−67%), District 1 tăng ở cả hai nửa (+27% và +2%). Riêng District 3 và District 7 đổi chiều giữa hai nửa năm, nên không kết luận cho hai quận này.</li>
+      <li><b>Hạn chế:</b> Thu Duc chỉ có 12 giao dịch cuối tuần, mỗi ô loại khách × quận chỉ có vài đơn. Đây là xu hướng gợi ý chứ chưa phải kết luận chắc chắn.</li>
+    </ul>
+  </div>
+<p class="note" style="margin-top:12px"><b>Dữ liệu sử dụng:</b> Date, Day_of_Week, Store, Customer_Type, Product_Category, Revenue. <b>Vì sao chọn các biểu đồ này:</b> Slope chart cho thay đổi giữa 2 mốc (ngày thường → cuối tuần); grouped bar để so sánh theo loại khách; stacked bar 100% cho cơ cấu danh mục.</p>
+</section>
+  <div class="bridge"><span class="lbl">Khép lại</span>Quay lại câu hỏi của sếp: <b>"Cửa hàng nào làm ăn tốt nhất?"</b></div>
+
+  <!-- ============ KẾT LUẬN ============ -->
+  <section class="block" id="conclusion">
+    <div class="tag">Kết luận</div>
+    <h2 class="sec-h">Doanh thu, lợi nhuận và sự hài lòng đến từ những nguồn khác nhau</h2>
+    <p class="lead">Năm insight cho thấy doanh thu chưa phản ánh đầy đủ hiệu quả kinh doanh: lợi nhuận gắn với <b>cơ cấu sản phẩm và mức giảm giá</b>, còn sự hài lòng gắn chặt nhất với <b>tốc độ giao hàng</b>.</p>
+    <div class="card" style="margin-bottom:18px">
+      <h3>Trả lời câu hỏi ban đầu: không có cửa hàng nào "tốt nhất" ở mọi mặt</h3>
+      <p style="margin:6px 0 4px;font-size:14.5px">Nếu chỉ nhìn doanh thu, câu trả lời là District 1. Nếu nhìn lợi nhuận, đó là Thu Duc. Nhưng Thu Duc lại có khách kém hài lòng nhất và gần như vắng khách vào cuối tuần. Mỗi cửa hàng có điểm mạnh riêng và một "đòn bẩy" riêng cần cải thiện:</p>
+      <div class="vwrap"><table class="verdict">
+        <tr><th>Cửa hàng</th><th>Điểm mạnh</th><th>Điểm yếu</th><th>Đòn bẩy cần dùng</th></tr>
+        <tr><td><span class="dot" style="background:#8fa9db"></span><b>District 1</b></td><td>Doanh thu cao nhất, giao nhanh nhất, khách hài lòng nhất, đông khách cuối tuần</td><td>Biên lợi nhuận thấp nhất (21,5%) vì phụ thuộc Electronics</td><td>Cơ cấu sản phẩm: đẩy Fashion và Sports, kiểm soát giảm giá Electronics</td></tr>
+        <tr><td><span class="dot" style="background:#8fcbe3"></span><b>District 3</b></td><td>Biên lợi nhuận cao nhất (27,0%), cuối tuần vẫn tăng</td><td>Doanh thu thấp nhất</td><td>Tăng lượng khách, nhắm vào sinh viên cuối tuần</td></tr>
+        <tr><td><span class="dot" style="background:#bba5dc"></span><b>District 7</b></td><td>Biên lợi nhuận tốt (26,7%)</td><td>45% đơn giao từ 3 ngày, cuối tuần giảm 29%</td><td>Tốc độ giao hàng</td></tr>
+        <tr><td><span class="dot" style="background:#ec8fad"></span><b>Thu Duc</b></td><td>Lợi nhuận cao nhất (14,0tr), mạnh nhất vào ngày thường</td><td>Điểm đánh giá thấp nhất, 67% đơn giao từ 3 ngày, cuối tuần giảm 68%</td><td>Tốc độ giao hàng và lịch nhân sự cuối tuần</td></tr>
+      </table></div>
+    </div>
+    <div class="concl">
+      <div class="card">
+        <h3>Những phát hiện chính</h3>
+        <ol>
+          <li><b>Bán nhiều chưa chắc lời nhiều.</b> District 1 dẫn đầu doanh thu nhưng có biên lợi nhuận thấp nhất (21,5%) vì 53% doanh thu đến từ Electronics. Thu Duc mới là quận lời nhiều nhất.</li>
+          <li><b>Electronics lời thấp, và giá vốn cao so với giá bán là lời giải thích hợp lý nhất.</b> Cả 4 sản phẩm Electronics nằm ở 4 vị trí biên thấp nhất. Ngay cả theo giá niêm yết, nhóm này chỉ lời 25,8%.</li>
+          <li><b>Giảm giá cao đi kèm điểm đánh giá thấp hơn.</b> Mối liên hệ này vẫn còn trong mô hình hồi quy đã kiểm soát tốc độ giao hàng, cửa hàng, danh mục và loại khách.</li>
+          <li><b>Tốc độ giao hàng có liên hệ mạnh nhất với điểm đánh giá</b> (tương quan −0,68). Cùng số ngày giao thì điểm ở 4 quận gần như bằng nhau. Thu Duc có điểm thấp nhất và cũng có 67% đơn phải chờ từ 3 ngày.</li>
+          <li><b>Cuối tuần, District 1 bán tốt hơn còn Thu Duc giảm mạnh.</b> Doanh thu mỗi ngày của Thu Duc giảm 68%, ổn định ở cả hai nửa năm. Sinh viên chiếm phần lớn giao dịch cuối tuần ở District 1.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Đề xuất cho nhà bán lẻ (cần kiểm chứng bằng thử nghiệm)</h3>
+        <ol>
+          <li><b>Thử nghiệm trần giảm giá</b> khoảng 15–20%, thấp hơn cho Electronics, vì mọi giao dịch lỗ đều có giảm giá từ 25% trở lên. Nên áp dụng thử ở một cửa hàng và so sánh trước khi mở rộng.</li>
+          <li><b>Dùng Electronics để kéo khách, không để kiếm lời.</b> Bán kèm phụ kiện hoặc sản phẩm Fashion/Sports có biên cao, đồng thời đàm phán lại giá nhập.</li>
+          <li><b>Đầu tư vào khâu giao hàng ở Thu Duc và District 7</b>, ưu tiên giao trong 2 ngày. Đây là hướng cải thiện điểm đánh giá có bằng chứng mạnh nhất trong dữ liệu.</li>
+          <li><b>Phân bổ nguồn lực cuối tuần theo quận:</b> tăng nhân sự và khuyến mãi nhắm vào sinh viên ở District 1/3, giảm ca cuối tuần ở Thu Duc.</li>
+        </ol>
+        <p class="note" style="margin-top:10px"><b>Giới hạn:</b> bộ dữ liệu chỉ có 240 giao dịch, nhiều nhóm con chỉ có vài chục đơn. Các mối quan hệ trên là tương quan, chưa chứng minh nhân quả, và nên được kiểm chứng lại với dữ liệu lớn hơn.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  25C02035_DataViz_Midterm · Dữ liệu: Urban Retail Sales – HCMC 2025 (240 giao dịch) · Biểu đồ: Apache ECharts 5.5.
+</footer>
+
+<script>
+/* ---------- Tổng quan ---------- */
+(()=>{
+const R = [[10,"Thu Duc","Home",738000,136617,25],[6,"District 1","Electronics",665600,44523,20],[10,"District 1","Electronics",672000,-49231,25],[9,"District 1","Fashion",287000,127009,0],[1,"District 7","Sports",705600,249407,10],[11,"District 3","Fashion",487900,134659,15],[9,"District 7","Home",415800,112557,10],[10,"Thu Duc","Home",862600,328083,5],[1,"Thu Duc","Food & Beverage",324700,62823,15],[6,"District 3","Fashion",591850,240909,5],[5,"District 3","Sports",316800,88557,10],[11,"District 3","Fashion",499500,103730,25],[8,"Thu Duc","Electronics",760500,108350,10],[10,"District 1","Home",334400,54206,20],[6,"District 1","Home",375300,125522,10],[3,"District 1","Sports",928800,263999,10],[7,"District 3","Food & Beverage",154800,44347,10],[0,"District 1","Fashion",261000,94797,10],[10,"District 7","Fashion",2209500,461015,25],[8,"District 3","Fashion",594150,176028,15],[9,"District 3","Sports",714000,260965,0],[5,"Thu Duc","Food & Beverage",199800,53813,10],[11,"District 1","Electronics",1348800,75299,20],[11,"District 3","Home",930750,221750,15],[10,"District 3","Electronics",1455300,304302,10],[2,"Thu Duc","Sports",1173600,358073,10],[6,"District 1","Home",1540200,362332,15],[0,"District 1","Home",1065000,372161,0],[2,"District 7","Fashion",1068300,406668,10],[9,"District 7","Sports",428400,120190,15],[9,"District 3","Electronics",1438200,277554,10],[11,"District 1","Electronics",2594700,400651,10],[4,"District 3","Food & Beverage",355500,108069,10],[5,"District 1","Electronics",854000,200979,0],[6,"District 1","Electronics",1359000,230312,10],[2,"District 3","Home",523800,144166,10],[2,"District 1","Electronics",406800,56756,10],[6,"Thu Duc","Sports",615400,159567,15],[3,"District 3","Electronics",387600,29433,15],[8,"District 7","Electronics",5382400,527567,20],[6,"District 7","Fashion",1696700,648326,5],[10,"District 7","Home",296400,95014,5],[9,"District 1","Electronics",912000,259355,5],[4,"District 1","Sports",657750,115786,25],[10,"District 7","Food & Beverage",254600,68108,5],[10,"Thu Duc","Sports",1147500,336961,10],[5,"District 1","Electronics",1122750,42964,25],[4,"District 7","Electronics",831600,175847,10],[9,"Thu Duc","Electronics",391000,39291,15],[2,"Thu Duc","Sports",634400,110351,20],[2,"District 3","Electronics",1424050,303258,5],[0,"Thu Duc","Fashion",731000,224313,15],[10,"District 1","Electronics",1866600,298271,15],[8,"District 3","Electronics",1327500,204066,10],[9,"District 1","Home",306750,37014,25],[10,"District 7","Fashion",884700,314500,10],[6,"District 7","Home",120800,23984,20],[7,"District 3","Home",522000,137216,10],[2,"District 7","Electronics",887300,184301,5],[1,"Thu Duc","Sports",3669300,1102215,10],[8,"Thu Duc","Sports",235000,90469,0],[6,"District 1","Fashion",1772800,556960,20],[7,"District 7","Home",742500,204897,10],[9,"Thu Duc","Sports",765000,307112,0],[8,"District 3","Home",198550,66022,5],[7,"District 3","Home",628000,211745,0],[7,"Thu Duc","Electronics",1196800,89065,20],[4,"District 7","Home",208050,75740,5],[0,"District 1","Food & Beverage",538650,139494,5],[6,"District 1","Food & Beverage",330600,99544,5],[3,"District 3","Fashion",832000,369629,0],[5,"Thu Duc","Food & Beverage",82800,22698,10],[10,"District 3","Food & Beverage",114300,27735,10],[3,"District 3","Fashion",583300,233191,5],[0,"District 1","Food & Beverage",237250,-25024,35],[4,"District 7","Sports",478800,171122,5],[4,"District 7","Sports",365000,140689,0],[8,"District 3","Fashion",993700,391329,5],[7,"District 7","Electronics",1087750,285445,5],[10,"District 3","Home",139400,36375,15],[8,"District 1","Home",164000,60422,0],[5,"District 3","Food & Beverage",122550,31006,5],[10,"Thu Duc","Home",129500,12415,30],[2,"District 3","Electronics",414900,91794,10],[0,"District 3","Sports",233100,72569,10],[1,"District 7","Sports",469300,158834,5],[9,"District 7","Food & Beverage",170100,47191,10],[6,"District 1","Food & Beverage",333000,82327,10],[2,"District 7","Sports",782000,246889,15],[6,"District 7","Home",305900,97440,5],[2,"District 3","Food & Beverage",126000,28428,10],[9,"District 1","Fashion",266950,100843,5],[6,"District 1","Home",1497600,512208,10],[5,"District 7","Home",429000,52158,25],[4,"District 7","Sports",998400,241657,20],[8,"Thu Duc","Fashion",1150450,430131,5],[5,"Thu Duc","Home",313500,107497,5],[1,"District 3","Electronics",1469700,225551,10],[1,"District 1","Home",382500,112572,10],[11,"District 1","Electronics",323250,-6533,25],[11,"District 1","Sports",679150,178862,15],[9,"District 3","Sports",892800,292702,10],[3,"District 7","Home",631800,193468,10],[11,"District 3","Home",382200,19386,35],[10,"District 1","Electronics",332800,26608,20],[9,"Thu Duc","Fashion",5349900,1757315,15],[6,"Thu Duc","Sports",440800,142575,5],[3,"Thu Duc","Electronics",2277150,364126,15],[1,"District 1","Electronics",735250,97666,15],[11,"Thu Duc","Electronics",409450,93329,5],[6,"District 3","Electronics",938400,147939,15],[2,"Thu Duc","Food & Beverage",144000,41262,10],[4,"District 1","Electronics",1019350,215718,5],[7,"District 3","Home",1989000,550641,10],[2,"Thu Duc","Electronics",1364800,135337,20],[10,"District 3","Food & Beverage",305100,77683,10],[9,"District 7","Fashion",941800,284414,15],[9,"Thu Duc","Sports",321100,120300,5],[5,"District 3","Food & Beverage",304200,72754,10],[8,"District 1","Food & Beverage",87400,22494,5],[7,"Thu Duc","Sports",618000,159281,25],[8,"District 3","Food & Beverage",171000,44889,5],[1,"District 3","Sports",308750,106581,5],[5,"District 1","Electronics",1007000,206009,5],[0,"Thu Duc","Food & Beverage",265050,70041,5],[6,"District 1","Food & Beverage",200600,44535,15],[4,"District 3","Fashion",1103400,384758,10],[2,"Thu Duc","Electronics",1489500,303186,10],[1,"District 1","Electronics",1224000,71282,20],[7,"District 3","Fashion",1147600,428891,5],[2,"District 7","Fashion",935750,354494,5],[11,"District 1","Fashion",471000,120693,25],[7,"District 1","Food & Beverage",1062000,338412,0],[4,"District 3","Fashion",842350,269487,15],[7,"Thu Duc","Home",523600,118709,15],[0,"District 7","Sports",231300,73406,10],[11,"Thu Duc","Fashion",874800,289958,10],[6,"Thu Duc","Sports",1192500,293254,10],[10,"District 1","Food & Beverage",172900,46537,5],[1,"District 7","Food & Beverage",72000,12245,10],[6,"District 3","Fashion",637000,240111,0],[6,"Thu Duc","Home",440000,156695,0],[11,"District 7","Fashion",655200,167039,20],[7,"District 1","Food & Beverage",207000,56620,10],[6,"District 1","Sports",249000,99497,0],[3,"District 7","Home",270300,61971,15],[4,"District 3","Food & Beverage",267900,88532,5],[7,"District 1","Fashion",1015550,368724,5],[6,"District 1","Fashion",837900,280280,5],[0,"District 1","Electronics",1060200,168616,10],[10,"District 3","Home",379100,93543,15],[11,"Thu Duc","Food & Beverage",237600,28222,20],[2,"Thu Duc","Fashion",1168200,410155,10],[7,"District 7","Fashion",1010800,376640,5],[1,"Thu Duc","Electronics",661300,88359,15],[8,"District 7","Home",1549800,472569,10],[4,"District 7","Home",609450,177918,15],[8,"District 7","Home",553850,165924,5],[9,"District 3","Fashion",732700,249943,15],[10,"Thu Duc","Sports",585600,140260,20],[1,"Thu Duc","Food & Beverage",136800,41533,5],[11,"District 3","Food & Beverage",403200,12011,30],[3,"District 3","Fashion",591850,216717,5],[0,"Thu Duc","Fashion",1170000,406531,10],[7,"District 1","Electronics",1422900,163183,10],[5,"District 1","Electronics",1003500,162991,10],[10,"Thu Duc","Electronics",3556000,1050951,0],[10,"Thu Duc","Home",331500,35470,25],[4,"District 7","Food & Beverage",163800,44215,10],[11,"District 1","Food & Beverage",509600,57673,20],[4,"District 1","Electronics",1422050,225747,15],[6,"District 3","Fashion",776900,218256,15],[3,"District 3","Home",342000,37827,25],[11,"Thu Duc","Food & Beverage",544000,112314,20],[2,"District 3","Sports",1253050,431870,5],[0,"District 1","Fashion",430100,131957,15],[6,"District 3","Home",336600,83722,15],[11,"District 7","Home",1093950,352764,15],[11,"Thu Duc","Electronics",815100,142548,5],[9,"District 7","Home",984300,253628,15],[11,"Thu Duc","Fashion",579600,196278,10],[11,"District 7","Fashion",617400,115544,30],[6,"District 1","Food & Beverage",414000,95714,10],[4,"Thu Duc","Fashion",991100,288774,15],[10,"District 7","Fashion",582000,241152,0],[8,"District 1","Fashion",243200,93167,5],[5,"District 1","Electronics",1252800,200371,10],[1,"District 7","Sports",247950,80602,5],[9,"Thu Duc","Electronics",1377900,106691,10],[3,"District 1","Food & Beverage",345800,94846,5],[11,"Thu Duc","Sports",696150,190041,15],[3,"District 1","Food & Beverage",135000,28921,10],[1,"District 7","Home",765700,245811,5],[10,"Thu Duc","Electronics",814800,-35124,30],[2,"District 1","Home",139400,31773,15],[2,"District 3","Fashion",1149500,448374,5],[7,"District 1","Electronics",1384000,122115,20],[10,"District 1","Sports",215050,49483,15],[2,"District 3","Fashion",582000,221211,0],[4,"District 3","Food & Beverage",124100,27012,15],[10,"Thu Duc","Sports",615600,225665,5],[11,"District 7","Fashion",812800,225975,20],[6,"District 1","Fashion",570600,217530,10],[2,"District 1","Electronics",2308500,431204,5],[0,"District 7","Sports",1298650,466607,5],[3,"Thu Duc","Sports",385000,155772,0],[2,"District 7","Sports",1224000,418974,10],[8,"District 1","Home",275400,63049,15],[1,"Thu Duc","Home",862600,241367,5],[6,"District 1","Fashion",819400,278068,15],[9,"District 3","Fashion",256500,98034,5],[7,"District 3","Electronics",643500,-14124,25],[2,"District 1","Fashion",995400,372372,10],[10,"District 1","Sports",1392300,388926,15],[9,"District 1","Electronics",855000,106915,10],[9,"District 3","Electronics",1073000,225723,0],[2,"Thu Duc","Food & Beverage",50050,-2928,35],[1,"Thu Duc","Fashion",1176100,466540,5],[11,"District 7","Fashion",510400,142659,20],[5,"District 1","Fashion",774350,227308,15],[4,"District 3","Home",204250,65920,5],[6,"Thu Duc","Fashion",1768500,585422,10],[8,"District 7","Sports",219300,58981,15],[11,"District 1","Fashion",263000,119152,0],[4,"Thu Duc","Sports",1128800,278650,20],[11,"District 1","Electronics",1478700,301735,10],[0,"District 7","Home",1427200,272457,20],[7,"District 1","Fashion",1207800,454064,10],[8,"Thu Duc","Sports",846600,276525,15],[1,"Thu Duc","Home",1467000,409895,10],[2,"District 7","Sports",842400,188078,20],[5,"District 1","Sports",1011500,267597,15],[11,"District 7","Sports",846300,59438,30],[7,"District 3","Fashion",879000,173512,25],[11,"Thu Duc","Electronics",429300,74448,10],[10,"District 7","Sports",755250,256195,5],[6,"District 1","Food & Beverage",133000,42932,5],[10,"District 7","Fashion",1030200,318579,15],[0,"District 7","Fashion",266400,104960,10],[1,"District 1","Electronics",881600,168125,5]]; // [monthIdx, Store, Category, Revenue, Profit, Discount]
+const M=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+const STORES=["District 1","District 3","District 7","Thu Duc"];
+const tr=v=>(v/1e6).toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})+' tr';
+let store=null;
+const pills=document.getElementById('ov-pills');
+['Tất cả',...STORES].forEach(s=>{const b=document.createElement('button');b.textContent=s;b.onclick=()=>{store=s==='Tất cả'?null:s;draw();};pills.appendChild(b);});
+const ch=echarts.init(document.getElementById('ov-month'));
+function draw(){
+  [...pills.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',(store||'Tất cả')===b.textContent));
+  const d=R.filter(r=>!store||r[1]===store);
+  const rev=d.reduce((a,r)=>a+r[3],0),prof=d.reduce((a,r)=>a+r[4],0);
+  document.getElementById('ov-kpis').innerHTML=[
+    [tr(rev),'Tổng doanh thu'],[tr(prof),'Tổng lợi nhuận'],
+    [(prof/rev*100).toLocaleString('vi-VN',{maximumFractionDigits:1})+'%','Biên lợi nhuận'],
+    [d.length,'Số giao dịch'],[Math.round(rev/d.length/1e3).toLocaleString('vi-VN')+'k','Giá trị đơn trung bình']]
+    .map(([v,l])=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('');
+  const mr=M.map((_,i)=>d.filter(r=>r[0]===i)), rv=mr.map(a=>a.reduce((s,r)=>s+r[3],0)/1e6), pf=mr.map(a=>a.reduce((s,r)=>s+r[4],0)/1e6);
+  ch.setOption({
+    grid:{left:50,right:20,top:40,bottom:70},
+    legend:{top:0,itemWidth:12,itemHeight:12,textStyle:{fontSize:12}},
+    tooltip:{trigger:'axis',formatter:p=>{const i=p[0].dataIndex;return `<b>Tháng ${i+1}${store?' · '+store:''}</b><br>Doanh thu: ${tr(rv[i]*1e6)}<br>Lợi nhuận: ${tr(pf[i]*1e6)}<br>Biên: ${rv[i]?(pf[i]/rv[i]*100).toFixed(1).replace('.',','):'–'}%<br>Số giao dịch: ${mr[i].length}`;}},
+    xAxis:{type:'category',data:M,axisTick:{show:false}},
+    yAxis:{type:'value',name:'triệu VND',nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    dataZoom:[{type:'slider',height:18,bottom:12,borderColor:'#e6e4df',fillerColor:'rgba(143,169,219,.2)',handleStyle:{color:'#8fa9db'}},{type:'inside'}],
+    series:[
+      {name:'Doanh thu',type:'bar',barWidth:'55%',data:rv.map(v=>+v.toFixed(2)),itemStyle:{color:'#c9d6ee',borderRadius:[4,4,0,0]}},
+      {name:'Lợi nhuận',type:'line',data:pf.map(v=>+v.toFixed(2)),symbolSize:8,itemStyle:{color:'#ec8fad'},lineStyle:{color:'#ec8fad',width:2.5}}]
+  });
+}
+draw();
+addEventListener('resize',()=>ch.resize());
+})();
+</script>
+<script>
+/* ---------- Insight 1: store_category.html ---------- */
+(()=>{
+
+const RAW = [{"Store":"District 1","Product_Category":"Electronics","rev":29513150,"prof":4221631,"n":26},{"Store":"District 1","Product_Category":"Fashion","rev":10216050,"prof":3542924,"n":15},{"Store":"District 1","Product_Category":"Food & Beverage","rev":4706800,"prof":1125025,"n":14},{"Store":"District 1","Product_Category":"Home","rev":6080550,"prof":1731259,"n":10},{"Store":"District 1","Product_Category":"Sports","rev":5133550,"prof":1364150,"n":7},{"Store":"District 3","Product_Category":"Electronics","rev":10572150,"prof":1795496,"n":10},{"Store":"District 3","Product_Category":"Fashion","rev":13281200,"prof":4598769,"n":18},{"Store":"District 3","Product_Category":"Food & Beverage","rev":2448650,"prof":562466,"n":11},{"Store":"District 3","Product_Category":"Home","rev":6575650,"prof":1668313,"n":12},{"Store":"District 3","Product_Category":"Sports","rev":3718500,"prof":1253244,"n":6},{"Store":"District 7","Product_Category":"Electronics","rev":8189050,"prof":1173160,"n":4},{"Store":"District 7","Product_Category":"Fashion","rev":13221950,"prof":4161965,"n":14},{"Store":"District 7","Product_Category":"Food & Beverage","rev":660500,"prof":171759,"n":4},{"Store":"District 7","Product_Category":"Home","rev":10404800,"prof":2858300,"n":16},{"Store":"District 7","Product_Category":"Sports","rev":9892650,"prof":2931069,"n":15},{"Store":"Thu Duc","Product_Category":"Electronics","rev":15543600,"prof":2560557,"n":13},{"Store":"Thu Duc","Product_Category":"Fashion","rev":14959650,"prof":5055417,"n":10},{"Store":"Thu Duc","Product_Category":"Food & Beverage","rev":1984800,"prof":429778,"n":9},{"Store":"Thu Duc","Product_Category":"Home","rev":5668300,"prof":1546748,"n":9},{"Store":"Thu Duc","Product_Category":"Sports","rev":15070350,"prof":4447071,"n":17}];
+
+// Quận xếp theo doanh thu; danh mục xếp theo biên lợi nhuận tăng dần
+const STORES = ["District 1","Thu Duc","District 7","District 3"];
+const CATS = ["Electronics","Food & Beverage","Home","Sports","Fashion"];
+const COLORS={"Electronics":"#9db4e0","Fashion":"#f5b8cf","Sports":"#a6d8ee","Home":"#cdb9e6","Food & Beverage":"#f3dc95"};
+const get = (s,c) => RAW.find(d => d.Store===s && d.Product_Category===c);
+const tot = (s,m) => RAW.filter(d=>d.Store===s).reduce((a,d)=>a+d[m],0);
+const tr = v => (v/1e6).toLocaleString('vi-VN',{maximumFractionDigits:1}) + ' tr';
+const pct = v => v.toLocaleString('vi-VN',{maximumFractionDigits:1}) + '%';
+
+let stackMetric = 'rev', heatMetric = 'margin', selected = null;
+
+/* ---------- Stacked 100% ---------- */
+const stack = echarts.init(document.getElementById('i1-stack'));
+function drawStack(){
+  const label = stackMetric==='rev' ? 'doanh thu' : 'lợi nhuận';
+  stack.setOption({
+    animationDuration:500,
+    grid:{left:88,right:18,top:40,bottom:30},
+    legend:{top:0,left:0,itemWidth:12,itemHeight:12,textStyle:{fontSize:12}},
+    tooltip:{trigger:'item',formatter:p=>{
+      const d=get(p.seriesName? STORES[p.dataIndex]:'',p.seriesName), s=STORES[p.dataIndex];
+      return `<b>${s} · ${p.seriesName}</b><br>
+        Tỷ trọng ${label}: <b>${pct(p.value)}</b><br>
+        Doanh thu: ${tr(d.rev)}<br>Lợi nhuận: ${tr(d.prof)}<br>
+        Biên lợi nhuận: ${pct(d.prof/d.rev*100)}<br>Số giao dịch: ${d.n}`;}},
+    xAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    yAxis:{type:'category',data:STORES,inverse:true,axisTick:{show:false},
+      axisLabel:{formatter:(s)=> s + '\n' + tr(tot(s,stackMetric)),lineHeight:15,fontSize:12}},
+    series:CATS.map(c=>({
+      name:c,type:'bar',stack:'all',barWidth:'58%',
+      itemStyle:{color:COLORS[c],borderColor:'#fff',borderWidth:1},
+      emphasis:{focus:'series'},
+      label:{show:true,color:'#2b2f36',fontSize:11,formatter:p=>p.value>=8?Math.round(p.value)+'%':''},
+      data:STORES.map(s=>({
+        value:+(get(s,c)[stackMetric]/tot(s,stackMetric)*100).toFixed(1),
+        itemStyle:{opacity: selected && selected!==s ? .3 : 1}
+      }))
+    }))
+  }, true);
+}
+stack.on('click', p => { selected = selected===STORES[p.dataIndex] ? null : STORES[p.dataIndex]; refresh(); });
+
+/* ---------- Heatmap ---------- */
+const heat = echarts.init(document.getElementById('i1-heat'));
+function heatVal(d){ return heatMetric==='margin' ? d.prof/d.rev*100 : d[heatMetric]/1e6; }
+function drawHeat(){
+  const data=[]; STORES.forEach((s,y)=>CATS.forEach((c,x)=>{
+    const d=get(s,c);
+    data.push({value:[x,y,+heatVal(d).toFixed(1)],
+      itemStyle:{opacity: selected && selected!==s ? .25 : 1}});
+  }));
+  const vals=data.map(d=>d.value[2]);
+  const fmt = v => heatMetric==='margin' ? pct(v) : v.toLocaleString('vi-VN',{maximumFractionDigits:1})+' tr';
+  heat.setOption({
+    animationDuration:400,
+    grid:{left:78,right:14,top:10,bottom:80},
+    tooltip:{formatter:p=>{
+      const s=STORES[p.value[1]], c=CATS[p.value[0]], d=get(s,c);
+      return `<b>${s} · ${c}</b><br>Doanh thu: ${tr(d.rev)}<br>Lợi nhuận: ${tr(d.prof)}<br>Biên lợi nhuận: ${pct(d.prof/d.rev*100)}<br>Số giao dịch: ${d.n}`;}},
+    xAxis:{type:'category',data:CATS,axisTick:{show:false},axisLabel:{interval:0,fontSize:11,rotate:20},splitArea:{show:false}},
+    yAxis:{type:'category',data:STORES,inverse:true,axisTick:{show:false},axisLabel:{fontSize:12}},
+    visualMap:{min:Math.floor(Math.min(...vals)),max:Math.ceil(Math.max(...vals)),calculable:true,orient:'horizontal',
+      left:'center',bottom:0,itemHeight:180,itemWidth:12,textStyle:{fontSize:11},
+      formatter:v=>fmt(v),inRange:{color:['#f3f6fb','#c9d6ee','#8fa9db','#6d8cc7']}},
+    series:[{type:'heatmap',data,
+      label:{show:true,fontSize:11.5,formatter:p=>fmt(p.value[2]),
+        color:'#1f2328'},
+      itemStyle:{borderColor:'#fff',borderWidth:2},
+      emphasis:{itemStyle:{borderColor:'#1f2328',borderWidth:2}}}]
+  }, true);
+  // chữ trắng cho ô màu đậm
+  const max=Math.max(...vals),min=Math.min(...vals);
+  heat.setOption({series:[{label:{color:undefined,rich:{}},
+    data:data.map(d=>({...d,label:{color:(d.value[2]-min)/(max-min)>.8?'#fff':'#1f2328'}}))}]});
+}
+heat.on('click', p => { const s=STORES[p.value[1]]; selected = selected===s?null:s; refresh(); });
+
+function refresh(){ drawStack(); drawHeat(); document.getElementById('i1-reset').hidden=!selected; }
+document.getElementById('i1-reset').onclick=()=>{selected=null;refresh();};
+
+function bindToggle(id,cb){
+  document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); cb(b.dataset.m); refresh();
+  });
+}
+bindToggle('i1-t1',m=>stackMetric=m);
+bindToggle('i1-t2',m=>heatMetric=m);
+refresh();
+addEventListener('resize',()=>{stack.resize();heat.resize();});
+
+})();
+</script>
+<script>
+/* ---------- Insight 2: electronics.tpl.html ---------- */
+(()=>{
+
+// [Category, Product, Revenue, Profit, n, avgDiscount, avgUnitPrice]
+const P = [["Electronics","Bluetooth Speaker",9870600,1675588,9,10.6,1112222],["Electronics","Power Bank",9359800,1483663,15,11.7,453800],["Electronics","Smart Watch",22764350,3899847,15,11.7,1581066],["Electronics","Wireless Earbuds",21823200,2691746,14,14.6,859285],["Fashion","Backpack",12098050,4260362,15,10.3,638200],["Fashion","Jacket",19266550,6279916,15,12.3,950666],["Fashion","Sneakers",12386600,4246802,11,10.9,1172818],["Fashion","T-Shirt",7927650,2571995,16,9.7,281312],["Food & Beverage","Coffee Beans",3226200,859058,8,9.4,177500],["Food & Beverage","Protein Drink",2676850,611056,14,12.5,73857],["Food & Beverage","Snack Box",2948150,581335,11,11.4,92818],["Food & Beverage","Tea Box",949550,237579,5,10.0,120400],["Home","Desk Lamp",7876700,2280560,11,13.2,423909],["Home","Kitchen Set",6102950,1587993,7,12.9,582000],["Home","Storage Box",5768400,1542157,14,11.8,159428],["Home","Water Bottle",8981250,2393910,15,12.7,221666],["Sports","Dumbbell Set",5383350,1392654,7,17.9,816428],["Sports","Running Shoes",12758500,3629626,9,13.3,1319222],["Sports","Sports Bottle",8501150,2764748,17,8.5,249411],["Sports","Yoga Mat",7172050,2208506,12,8.3,349583]];
+const LIST = {"Electronics":[25.8,15.3,12.3],"Fashion":[41.7,33.6,10.8],"Food & Beverage":[32.2,23.4,11.2],"Home":[36.2,27.2,12.6],"Sports":[38.1,29.6,10.9]};
+const CATS=["Electronics","Fashion","Sports","Home","Food & Beverage"];
+const CATCOL={"Electronics":"#9db4e0","Fashion":"#f5b8cf","Sports":"#a6d8ee","Home":"#cdb9e6","Food & Beverage":"#f3dc95"};
+const tr=v=>(v/1e6).toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})+' tr';
+const pc=v=>v.toLocaleString('vi-VN',{maximumFractionDigits:1})+'%';
+const mg=r=>r[3]/r[2]*100;
+let sizeBy='rev';
+
+/* ---- 1. Treemap ---- */
+const tree=echarts.init(document.getElementById('i2-tree'));
+// thang màu biên lợi nhuận: 12% đỏ -> 24% kem -> 36% xanh
+const STOPS=[[12,[240,150,150]],[18,[248,200,180]],[24,[250,243,232]],[30,[200,220,244]],[36,[140,178,230]]];
+function mcol(m){m=Math.max(12,Math.min(36,m));for(let i=1;i<STOPS.length;i++){const[a,ca]=STOPS[i-1],[b,cb]=STOPS[i];
+  if(m<=b){const f=(m-a)/(b-a);return 'rgb('+ca.map((x,j)=>Math.round(x+(cb[j]-x)*f)).join(',')+')';}}}
+const txt=m=>'#2b2f36';
+function drawTree(){
+  const data=CATS.map(c=>{const ps=P.filter(r=>r[0]===c);const rev=ps.reduce((a,r)=>a+r[2],0),prof=ps.reduce((a,r)=>a+r[3],0);
+    return {name:c,value:sizeBy==='rev'?rev:prof,info:{rev,prof,m:prof/rev*100},
+      itemStyle:{borderColor:CATCOL[c]},
+      upperLabel:{backgroundColor:CATCOL[c]},
+      children:ps.map(r=>({name:r[1],value:sizeBy==='rev'?r[2]:r[3],info:{rev:r[2],prof:r[3],m:mg(r),n:r[4],d:r[5],cat:c},
+        itemStyle:{color:mcol(mg(r))},label:{color:txt(mg(r))}}))};});
+  tree.setOption({
+    tooltip:{formatter:p=>{const i=p.data&&p.data.info;if(!i)return'';
+      return `<b>${p.name}</b>${i.cat?' <span style="color:#888">('+i.cat+')</span>':''}<br>Doanh thu: ${tr(i.rev)}<br>Lợi nhuận: ${tr(i.prof)}<br>Biên lợi nhuận: <b>${pc(i.m)}</b>${i.n?'<br>Số giao dịch: '+i.n+'<br>Giảm giá trung bình: '+pc(i.d):''}`;}},
+    series:[{type:'treemap',roam:false,nodeClick:'zoomToNode',top:6,bottom:30,left:0,right:0,leafDepth:null,
+      breadcrumb:{show:true,bottom:4,height:20,itemStyle:{color:'#eee',textStyle:{color:'#333'}}},
+      label:{show:true,fontSize:11,lineHeight:14,formatter:p=>{const i=p.data&&p.data.info;return i?`${p.name}\n${pc(i.m)}`:p.name;}},
+      upperLabel:{show:true,height:22,color:'#2b2f36',fontWeight:600,fontSize:12,
+        formatter:p=>{const i=p.data&&p.data.info;return i?`${p.name} · ${sizeBy==='rev'?'Doanh thu':'Lợi nhuận'} ${tr(sizeBy==='rev'?i.rev:i.prof)} · biên ${pc(i.m)}`:p.name;}},
+      levels:[{itemStyle:{borderWidth:0,gapWidth:4}},{itemStyle:{borderWidth:3,gapWidth:1}},{itemStyle:{borderColor:'#fff',borderWidth:1,gapWidth:1}}],
+      data}]
+  },true);
+}
+
+/* ---- 2. Ranking ---- */
+const rank=echarts.init(document.getElementById('i2-rank'));
+const sorted=[...P].sort((a,b)=>mg(a)-mg(b));
+function drawRank(){
+  rank.setOption({
+    grid:{left:118,right:46,top:44,bottom:28},
+    legend:{top:0,left:0,itemWidth:10,itemHeight:10,textStyle:{fontSize:11},data:CATS},
+    tooltip:{trigger:'item',formatter:p=>{const r=sorted[p.dataIndex];
+      return `<b>${r[1]}</b> (${r[0]})<br>Biên lợi nhuận: <b>${pc(mg(r))}</b><br>Doanh thu: ${tr(r[2])}<br>Lợi nhuận: ${tr(r[3])}<br>Giảm giá trung bình: ${pc(r[5])}`;}},
+    xAxis:{type:'value',max:40,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    yAxis:{type:'category',data:sorted.map(r=>r[1]),inverse:true,axisTick:{show:false},axisLabel:{fontSize:11,interval:0,
+      formatter:(v,i)=>sorted[i][0]==='Electronics'?'{e|'+v+'}':v,rich:{e:{fontWeight:700,color:'#5576a8'}}}},
+    series:CATS.map(c=>({name:c,type:'bar',stack:'one',barWidth:'70%',itemStyle:{color:CATCOL[c],borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',fontSize:10.5,color:'#656d76',formatter:p=>p.value?pc(p.value):''},
+      emphasis:{focus:'series'},
+      data:sorted.map(r=>r[0]===c?+mg(r).toFixed(1):null)}))
+  },true);
+}
+
+/* ---- 3. Why ---- */
+const why=echarts.init(document.getElementById('i2-why'));
+function drawWhy(){
+  const order=[...CATS].sort((a,b)=>LIST[a][0]-LIST[b][0]);
+  why.setOption({
+    grid:{left:50,right:56,top:innerWidth<600?78:44,bottom:30},
+    legend:{top:0,itemWidth:12,itemHeight:12,textStyle:{fontSize:12}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:p=>{const c=p[0].name,l=LIST[c];
+      return `<b>${c}</b><br>Biên theo giá niêm yết: ${pc(l[0])}<br>Biên thực tế: <b>${pc(l[1])}</b><br>Mất do giảm giá: ${pc(l[0]-l[1])} điểm<br>Giảm giá trung bình: ${pc(l[2])}`;}},
+    xAxis:{type:'category',data:order,axisTick:{show:false}},
+    yAxis:[{type:'value',name:'Biên lợi nhuận',max:50,axisLabel:{formatter:'{value}%'},nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+           {type:'value',name:'Giảm giá trung bình',min:0,max:25,axisLabel:{formatter:'{value}%'},splitLine:{show:false},nameTextStyle:{align:'right'}}],
+    series:[
+      {name:'Biên nếu bán giá niêm yết',type:'bar',barGap:'8%',barWidth:'26%',
+        data:order.map(c=>({value:LIST[c][0],itemStyle:{color:'#e3e8f2',borderRadius:[4,4,0,0]}})),
+        itemStyle:{color:'#e3e8f2'},label:{show:true,position:'top',fontSize:11,formatter:p=>pc(p.value)}},
+      {name:'Biên thực tế (sau giảm giá)',type:'bar',barWidth:'26%',
+        data:order.map(c=>({value:LIST[c][1],itemStyle:{color:c==='Electronics'?'#f09696':'#9db4e0',borderRadius:[4,4,0,0]}})),
+        itemStyle:{color:'#9db4e0'},label:{show:true,position:'top',fontSize:11,fontWeight:600,formatter:p=>pc(p.value)}},
+      {name:'Giảm giá trung bình',type:'line',yAxisIndex:1,symbolSize:8,data:order.map(c=>LIST[c][2]),
+        itemStyle:{color:'#e88fb4'},lineStyle:{color:'#e88fb4',width:2.5},
+        label:{show:false}}]
+  },true);
+}
+
+/* ---- 4. Scatter: discount vs margin ---- */
+const TX = [[25,18.5,136617,"Home","Water Bottle","T0001","Thu Duc"],[20,6.7,44523,"Electronics","Wireless Earbuds","T0002","District 1"],[25,-7.3,-49231,"Electronics","Power Bank","T0003","District 1"],[0,44.3,127009,"Fashion","T-Shirt","T0004","District 1"],[10,35.3,249407,"Sports","Dumbbell Set","T0005","District 7"],[15,27.6,134659,"Fashion","T-Shirt","T0006","District 3"],[10,27.1,112557,"Home","Desk Lamp","T0007","District 7"],[5,38.0,328083,"Home","Water Bottle","T0008","Thu Duc"],[15,19.3,62823,"Food & Beverage","Coffee Beans","T0009","Thu Duc"],[5,40.7,240909,"Fashion","Backpack","T0010","District 3"],[10,28.0,88557,"Sports","Yoga Mat","T0011","District 3"],[25,20.8,103730,"Fashion","Backpack","T0012","District 3"],[10,14.2,108350,"Electronics","Wireless Earbuds","T0013","Thu Duc"],[20,16.2,54206,"Home","Desk Lamp","T0014","District 1"],[10,33.4,125522,"Home","Desk Lamp","T0015","District 1"],[10,28.4,263999,"Sports","Yoga Mat","T0016","District 1"],[10,28.6,44347,"Food & Beverage","Coffee Beans","T0017","District 3"],[10,36.3,94797,"Fashion","T-Shirt","T0018","District 1"],[25,20.9,461015,"Fashion","Jacket","T0019","District 7"],[15,29.6,176028,"Fashion","Backpack","T0020","District 3"],[0,36.5,260965,"Sports","Yoga Mat","T0021","District 3"],[10,26.9,53813,"Food & Beverage","Protein Drink","T0022","Thu Duc"],[20,5.6,75299,"Electronics","Wireless Earbuds","T0023","District 1"],[15,23.8,221750,"Home","Water Bottle","T0024","District 3"],[10,20.9,304302,"Electronics","Smart Watch","T0025","District 3"],[10,30.5,358073,"Sports","Yoga Mat","T0026","Thu Duc"],[15,23.5,362332,"Home","Kitchen Set","T0027","District 1"],[0,34.9,372161,"Home","Water Bottle","T0028","District 1"],[10,38.1,406668,"Fashion","Sneakers","T0029","District 7"],[15,28.1,120190,"Sports","Sports Bottle","T0030","District 7"],[10,19.3,277554,"Electronics","Smart Watch","T0031","District 3"],[10,15.4,400651,"Electronics","Wireless Earbuds","T0032","District 1"],[10,30.4,108069,"Food & Beverage","Protein Drink","T0033","District 3"],[0,23.5,200979,"Electronics","Power Bank","T0034","District 1"],[10,16.9,230312,"Electronics","Smart Watch","T0035","District 1"],[10,27.5,144166,"Home","Kitchen Set","T0036","District 3"],[10,14.0,56756,"Electronics","Power Bank","T0037","District 1"],[15,25.9,159567,"Sports","Yoga Mat","T0038","Thu Duc"],[15,7.6,29433,"Electronics","Power Bank","T0039","District 3"],[20,9.8,527567,"Electronics","Wireless Earbuds","T0040","District 7"],[5,38.2,648326,"Fashion","Jacket","T0041","District 7"],[5,32.1,95014,"Home","Storage Box","T0042","District 7"],[5,28.4,259355,"Electronics","Power Bank","T0043","District 1"],[25,17.6,115786,"Sports","Dumbbell Set","T0044","District 1"],[5,26.8,68108,"Food & Beverage","Protein Drink","T0045","District 7"],[10,29.4,336961,"Sports","Running Shoes","T0046","Thu Duc"],[25,3.8,42964,"Electronics","Smart Watch","T0047","District 1"],[10,21.1,175847,"Electronics","Power Bank","T0048","District 7"],[15,10.0,39291,"Electronics","Power Bank","T0049","Thu Duc"],[20,17.4,110351,"Sports","Dumbbell Set","T0050","Thu Duc"],[5,21.3,303258,"Electronics","Smart Watch","T0051","District 3"],[15,30.7,224313,"Fashion","Jacket","T0052","Thu Duc"],[15,16.0,298271,"Electronics","Bluetooth Speaker","T0053","District 1"],[10,15.4,204066,"Electronics","Smart Watch","T0054","District 3"],[25,12.1,37014,"Home","Desk Lamp","T0055","District 1"],[10,35.5,314500,"Fashion","Jacket","T0056","District 7"],[20,19.9,23984,"Home","Storage Box","T0057","District 7"],[10,26.3,137216,"Home","Kitchen Set","T0058","District 3"],[5,20.8,184301,"Electronics","Power Bank","T0059","District 7"],[10,30.0,1102215,"Sports","Running Shoes","T0060","Thu Duc"],[0,38.5,90469,"Sports","Sports Bottle","T0061","Thu Duc"],[20,31.4,556960,"Fashion","Sneakers","T0062","District 1"],[10,27.6,204897,"Home","Storage Box","T0063","District 7"],[0,40.1,307112,"Sports","Sports Bottle","T0064","Thu Duc"],[5,33.3,66022,"Home","Water Bottle","T0065","District 3"],[0,33.7,211745,"Home","Storage Box","T0066","District 3"],[20,7.4,89065,"Electronics","Smart Watch","T0067","Thu Duc"],[5,36.4,75740,"Home","Water Bottle","T0068","District 7"],[5,25.9,139494,"Food & Beverage","Protein Drink","T0069","District 1"],[5,30.1,99544,"Food & Beverage","Coffee Beans","T0070","District 1"],[0,44.4,369629,"Fashion","Jacket","T0071","District 3"],[10,27.4,22698,"Food & Beverage","Snack Box","T0072","Thu Duc"],[10,24.3,27735,"Food & Beverage","Tea Box","T0073","District 3"],[5,40.0,233191,"Fashion","T-Shirt","T0074","District 3"],[35,-10.5,-25024,"Food & Beverage","Protein Drink","T0075","District 1"],[5,35.7,171122,"Sports","Sports Bottle","T0076","District 7"],[0,38.5,140689,"Sports","Yoga Mat","T0077","District 7"],[5,39.4,391329,"Fashion","Jacket","T0078","District 3"],[5,26.2,285445,"Electronics","Bluetooth Speaker","T0079","District 7"],[15,26.1,36375,"Home","Storage Box","T0080","District 3"],[0,36.8,60422,"Home","Storage Box","T0081","District 1"],[5,25.3,31006,"Food & Beverage","Tea Box","T0082","District 3"],[30,9.6,12415,"Home","Water Bottle","T0083","Thu Duc"],[10,22.1,91794,"Electronics","Power Bank","T0084","District 3"],[10,31.1,72569,"Sports","Sports Bottle","T0085","District 3"],[5,33.8,158834,"Sports","Sports Bottle","T0086","District 7"],[10,27.7,47191,"Food & Beverage","Protein Drink","T0087","District 7"],[10,24.7,82327,"Food & Beverage","Coffee Beans","T0088","District 1"],[15,31.6,246889,"Sports","Sports Bottle","T0089","District 7"],[5,31.9,97440,"Home","Storage Box","T0090","District 7"],[10,22.6,28428,"Food & Beverage","Protein Drink","T0091","District 3"],[5,37.8,100843,"Fashion","T-Shirt","T0092","District 1"],[10,34.2,512208,"Home","Desk Lamp","T0093","District 1"],[25,12.2,52158,"Home","Kitchen Set","T0094","District 7"],[20,24.2,241657,"Sports","Running Shoes","T0095","District 7"],[5,37.4,430131,"Fashion","Sneakers","T0096","Thu Duc"],[5,34.3,107497,"Home","Storage Box","T0097","Thu Duc"],[10,15.3,225551,"Electronics","Smart Watch","T0098","District 3"],[10,29.4,112572,"Home","Desk Lamp","T0099","District 1"],[25,-2.0,-6533,"Electronics","Power Bank","T0100","District 1"],[15,26.3,178862,"Sports","Dumbbell Set","T0101","District 1"],[10,32.8,292702,"Sports","Sports Bottle","T0102","District 3"],[10,30.6,193468,"Home","Water Bottle","T0103","District 7"],[35,5.1,19386,"Home","Storage Box","T0104","District 3"],[20,8.0,26608,"Electronics","Power Bank","T0105","District 1"],[15,32.8,1757315,"Fashion","Jacket","T0106","Thu Duc"],[5,32.3,142575,"Sports","Sports Bottle","T0107","Thu Duc"],[15,16.0,364126,"Electronics","Wireless Earbuds","T0108","Thu Duc"],[15,13.3,97666,"Electronics","Wireless Earbuds","T0109","District 1"],[5,22.8,93329,"Electronics","Power Bank","T0110","Thu Duc"],[15,15.8,147939,"Electronics","Bluetooth Speaker","T0111","District 3"],[10,28.7,41262,"Food & Beverage","Protein Drink","T0112","Thu Duc"],[5,21.2,215718,"Electronics","Bluetooth Speaker","T0113","District 1"],[10,27.7,550641,"Home","Desk Lamp","T0114","District 3"],[20,9.9,135337,"Electronics","Wireless Earbuds","T0115","Thu Duc"],[10,25.5,77683,"Food & Beverage","Tea Box","T0116","District 3"],[15,30.2,284414,"Fashion","Sneakers","T0117","District 7"],[5,37.5,120300,"Sports","Yoga Mat","T0118","Thu Duc"],[10,23.9,72754,"Food & Beverage","Coffee Beans","T0119","District 3"],[5,25.7,22494,"Food & Beverage","Snack Box","T0120","District 1"],[25,25.8,159281,"Sports","Dumbbell Set","T0121","Thu Duc"],[5,26.3,44889,"Food & Beverage","Snack Box","T0122","District 3"],[5,34.5,106581,"Sports","Yoga Mat","T0123","District 3"],[5,20.5,206009,"Electronics","Bluetooth Speaker","T0124","District 1"],[5,26.4,70041,"Food & Beverage","Snack Box","T0125","Thu Duc"],[15,22.2,44535,"Food & Beverage","Tea Box","T0126","District 1"],[10,34.9,384758,"Fashion","Sneakers","T0127","District 3"],[10,20.4,303186,"Electronics","Smart Watch","T0128","Thu Duc"],[20,5.8,71282,"Electronics","Smart Watch","T0129","District 1"],[5,37.4,428891,"Fashion","Sneakers","T0130","District 3"],[5,37.9,354494,"Fashion","Jacket","T0131","District 7"],[25,25.6,120693,"Fashion","Backpack","T0132","District 1"],[0,31.9,338412,"Food & Beverage","Coffee Beans","T0133","District 1"],[15,32.0,269487,"Fashion","Jacket","T0134","District 3"],[15,22.7,118709,"Home","Storage Box","T0135","Thu Duc"],[10,31.7,73406,"Sports","Sports Bottle","T0136","District 7"],[10,33.1,289958,"Fashion","Jacket","T0137","Thu Duc"],[10,24.6,293254,"Sports","Running Shoes","T0138","Thu Duc"],[5,26.9,46537,"Food & Beverage","Coffee Beans","T0139","District 1"],[10,17.0,12245,"Food & Beverage","Protein Drink","T0140","District 7"],[0,37.7,240111,"Fashion","Backpack","T0141","District 3"],[0,35.6,156695,"Home","Water Bottle","T0142","Thu Duc"],[20,25.5,167039,"Fashion","T-Shirt","T0143","District 7"],[10,27.4,56620,"Food & Beverage","Tea Box","T0144","District 1"],[0,40.0,99497,"Sports","Sports Bottle","T0145","District 1"],[15,22.9,61971,"Home","Storage Box","T0146","District 7"],[5,33.0,88532,"Food & Beverage","Snack Box","T0147","District 3"],[5,36.3,368724,"Fashion","Sneakers","T0148","District 1"],[5,33.5,280280,"Fashion","T-Shirt","T0149","District 1"],[10,15.9,168616,"Electronics","Bluetooth Speaker","T0150","District 1"],[15,24.7,93543,"Home","Desk Lamp","T0151","District 3"],[20,11.9,28222,"Food & Beverage","Snack Box","T0152","Thu Duc"],[10,35.1,410155,"Fashion","Backpack","T0153","Thu Duc"],[5,37.3,376640,"Fashion","T-Shirt","T0154","District 7"],[15,13.4,88359,"Electronics","Wireless Earbuds","T0155","Thu Duc"],[10,30.5,472569,"Home","Kitchen Set","T0156","District 7"],[15,29.2,177918,"Home","Water Bottle","T0157","District 7"],[5,30.0,165924,"Home","Kitchen Set","T0158","District 7"],[15,34.1,249943,"Fashion","Jacket","T0159","District 3"],[20,24.0,140260,"Sports","Yoga Mat","T0160","Thu Duc"],[5,30.4,41533,"Food & Beverage","Protein Drink","T0161","Thu Duc"],[30,3.0,12011,"Food & Beverage","Snack Box","T0162","District 3"],[5,36.6,216717,"Fashion","Backpack","T0163","District 3"],[10,34.7,406531,"Fashion","Sneakers","T0164","Thu Duc"],[10,11.5,163183,"Electronics","Smart Watch","T0165","District 1"],[10,16.2,162991,"Electronics","Bluetooth Speaker","T0166","District 1"],[0,29.6,1050951,"Electronics","Smart Watch","T0167","Thu Duc"],[25,10.7,35470,"Home","Water Bottle","T0168","Thu Duc"],[10,27.0,44215,"Food & Beverage","Snack Box","T0169","District 7"],[20,11.3,57673,"Food & Beverage","Snack Box","T0170","District 1"],[15,15.9,225747,"Electronics","Smart Watch","T0171","District 1"],[15,28.1,218256,"Fashion","Jacket","T0172","District 3"],[25,11.1,37827,"Home","Water Bottle","T0173","District 3"],[20,20.6,112314,"Food & Beverage","Coffee Beans","T0174","Thu Duc"],[5,34.5,431870,"Sports","Running Shoes","T0175","District 3"],[15,30.7,131957,"Fashion","T-Shirt","T0176","District 1"],[15,24.9,83722,"Home","Desk Lamp","T0177","District 3"],[15,32.2,352764,"Home","Desk Lamp","T0178","District 7"],[5,17.5,142548,"Electronics","Wireless Earbuds","T0179","Thu Duc"],[15,25.8,253628,"Home","Kitchen Set","T0180","District 7"],[10,33.9,196278,"Fashion","Backpack","T0181","Thu Duc"],[30,18.7,115544,"Fashion","T-Shirt","T0182","District 7"],[10,23.1,95714,"Food & Beverage","Snack Box","T0183","District 1"],[15,29.1,288774,"Fashion","Sneakers","T0184","Thu Duc"],[0,41.4,241152,"Fashion","Backpack","T0185","District 7"],[5,38.3,93167,"Fashion","T-Shirt","T0186","District 1"],[10,16.0,200371,"Electronics","Power Bank","T0187","District 1"],[5,32.5,80602,"Sports","Sports Bottle","T0188","District 7"],[10,7.7,106691,"Electronics","Smart Watch","T0189","Thu Duc"],[5,27.4,94846,"Food & Beverage","Snack Box","T0190","District 1"],[15,27.3,190041,"Sports","Dumbbell Set","T0191","Thu Duc"],[10,21.4,28921,"Food & Beverage","Protein Drink","T0192","District 1"],[5,32.1,245811,"Home","Desk Lamp","T0193","District 7"],[30,-4.3,-35124,"Electronics","Bluetooth Speaker","T0194","Thu Duc"],[15,22.8,31773,"Home","Storage Box","T0195","District 1"],[5,39.0,448374,"Fashion","Backpack","T0196","District 3"],[20,8.8,122115,"Electronics","Wireless Earbuds","T0197","District 1"],[15,23.0,49483,"Sports","Sports Bottle","T0198","District 1"],[0,38.0,221211,"Fashion","T-Shirt","T0199","District 3"],[15,21.8,27012,"Food & Beverage","Protein Drink","T0200","District 3"],[5,36.7,225665,"Sports","Yoga Mat","T0201","Thu Duc"],[20,27.8,225975,"Fashion","Jacket","T0202","District 7"],[10,38.1,217530,"Fashion","Backpack","T0203","District 1"],[5,18.7,431204,"Electronics","Wireless Earbuds","T0204","District 1"],[5,35.9,466607,"Sports","Running Shoes","T0205","District 7"],[0,40.5,155772,"Sports","Yoga Mat","T0206","Thu Duc"],[10,34.2,418974,"Sports","Running Shoes","T0207","District 7"],[15,22.9,63049,"Home","Storage Box","T0208","District 1"],[5,28.0,241367,"Home","Water Bottle","T0209","Thu Duc"],[15,33.9,278068,"Fashion","Jacket","T0210","District 1"],[5,38.2,98034,"Fashion","T-Shirt","T0211","District 3"],[25,-2.2,-14124,"Electronics","Wireless Earbuds","T0212","District 3"],[10,37.4,372372,"Fashion","Sneakers","T0213","District 1"],[15,27.9,388926,"Sports","Dumbbell Set","T0214","District 1"],[10,12.5,106915,"Electronics","Power Bank","T0215","District 1"],[0,21.0,225723,"Electronics","Bluetooth Speaker","T0216","District 3"],[35,-5.9,-2928,"Food & Beverage","Protein Drink","T0217","Thu Duc"],[5,39.7,466540,"Fashion","Backpack","T0218","Thu Duc"],[20,28.0,142659,"Fashion","Backpack","T0219","District 7"],[15,29.4,227308,"Fashion","Jacket","T0220","District 1"],[5,32.3,65920,"Home","Water Bottle","T0221","District 3"],[10,33.1,585422,"Fashion","Backpack","T0222","Thu Duc"],[15,26.9,58981,"Sports","Sports Bottle","T0223","District 7"],[0,45.3,119152,"Fashion","T-Shirt","T0224","District 1"],[20,24.7,278650,"Sports","Running Shoes","T0225","Thu Duc"],[10,20.4,301735,"Electronics","Smart Watch","T0226","District 1"],[20,19.1,272457,"Home","Water Bottle","T0227","District 7"],[10,37.6,454064,"Fashion","Backpack","T0228","District 1"],[15,32.7,276525,"Sports","Sports Bottle","T0229","Thu Duc"],[10,27.9,409895,"Home","Storage Box","T0230","Thu Duc"],[20,22.3,188078,"Sports","Yoga Mat","T0231","District 7"],[15,26.5,267597,"Sports","Sports Bottle","T0232","District 1"],[30,7.0,59438,"Sports","Running Shoes","T0233","District 7"],[25,19.7,173512,"Fashion","T-Shirt","T0234","District 3"],[10,17.3,74448,"Electronics","Power Bank","T0235","Thu Duc"],[5,33.9,256195,"Sports","Sports Bottle","T0236","District 7"],[5,32.3,42932,"Food & Beverage","Protein Drink","T0237","District 1"],[15,30.9,318579,"Fashion","Sneakers","T0238","District 7"],[10,39.4,104960,"Fashion","T-Shirt","T0239","District 7"],[5,19.1,168125,"Electronics","Wireless Earbuds","T0240","District 1"]]; // [Discount, Margin%, Profit, Category, Product, ID, Store]
+const scat=echarts.init(document.getElementById('i2-scat'));
+function jit(id){let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))%997;return (h/997-.5)*2.6;}
+function drawScat(){
+  scat.setOption({
+    grid:{left:52,right:20,top:44,bottom:44},
+    legend:{top:0,itemWidth:10,itemHeight:10,textStyle:{fontSize:12},data:CATS},
+    tooltip:{trigger:'item',formatter:p=>{const r=p.data.r;return `<b>${r[4]}</b> (${r[3]})<br>${r[5]} · ${r[6]}<br>Giảm giá: ${r[0]}%<br>Biên lợi nhuận: <b>${pc(r[1])}</b><br>Lợi nhuận: ${(r[2]/1e3).toLocaleString('vi-VN',{maximumFractionDigits:0})}k`;}},
+    xAxis:{type:'value',name:'Mức giảm giá (%)',nameLocation:'middle',nameGap:28,min:-5,max:40,interval:5,axisLabel:{formatter:v=>(v<0||v>35)?'':v+'%'},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    yAxis:{type:'value',name:'Biên lợi nhuận của giao dịch (%)',nameTextStyle:{align:'left'},axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#f0f0f0'}}},
+    toolbox:{right:0,top:22,feature:{dataZoom:{title:{zoom:'Kéo chọn vùng',back:'Quay lại'}},restore:{title:'Đặt lại'}}},
+    series:CATS.map(c=>({name:c,type:'scatter',symbolSize:9,
+      itemStyle:{color:CATCOL[c],opacity:.9},
+      emphasis:{focus:'series'},
+      markLine:c==='Electronics'?{symbol:'none',silent:true,lineStyle:{color:'#d9789b',type:'dashed'},label:{formatter:'Hòa vốn (0%)',position:'insideEndTop',color:'#d9789b',fontSize:11},data:[{yAxis:0}]}:undefined,
+      data:TX.filter(r=>r[3]===c).map(r=>({value:[r[0]+jit(r[5]),r[1]],r,
+        itemStyle:r[1]<0?{borderColor:'#c0392b',borderWidth:2}:{}}))}))
+  },true);
+}
+function refresh(){drawTree();drawRank();drawWhy();drawScat();}
+document.querySelectorAll('#i2-tSize button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#i2-tSize button').forEach(x=>x.classList.remove('on'));b.classList.add('on');sizeBy=b.dataset.m;drawTree();});
+// Rê chuột trên bảng xếp hạng -> làm nổi bật ô tương ứng trên treemap
+rank.on('mouseover',p=>tree.dispatchAction({type:'highlight',seriesIndex:0,name:sorted[p.dataIndex][1]}));
+rank.on('mouseout',p=>tree.dispatchAction({type:'downplay',seriesIndex:0,name:sorted[p.dataIndex][1]}));
+refresh();
+addEventListener('resize',()=>[tree,rank,why,scat].forEach(c=>c.resize()));
+
+})();
+</script>
+<script>
+/* ---------- Insight 3: discount_rating.tpl.html ---------- */
+(()=>{
+
+// [Discount, Rating, Delivery_Days, Category, Store, Product, ID] — đã bỏ dòng thiếu Rating
+const ROWS = [[25,4.43,2.0,"Home","Thu Duc","Water Bottle","T0001"],[20,4.3,1.0,"Electronics","District 1","Wireless Earbuds","T0002"],[25,3.86,3.0,"Electronics","District 1","Power Bank","T0003"],[0,4.71,1.0,"Fashion","District 1","T-Shirt","T0004"],[10,4.38,3.0,"Sports","District 7","Dumbbell Set","T0005"],[15,4.36,2.0,"Fashion","District 3","T-Shirt","T0006"],[10,4.49,1.0,"Home","District 7","Desk Lamp","T0007"],[5,4.09,3.0,"Home","Thu Duc","Water Bottle","T0008"],[15,3.98,3.0,"Food & Beverage","Thu Duc","Coffee Beans","T0009"],[5,4.51,2.0,"Fashion","District 3","Backpack","T0010"],[10,4.22,1.0,"Sports","District 3","Yoga Mat","T0011"],[25,4.19,2.0,"Fashion","District 3","Backpack","T0012"],[10,4.21,1.0,"Electronics","Thu Duc","Wireless Earbuds","T0013"],[20,3.92,NaN,"Home","District 1","Desk Lamp","T0014"],[10,4.12,2.0,"Home","District 1","Desk Lamp","T0015"],[10,4.22,2.0,"Sports","District 1","Yoga Mat","T0016"],[10,4.25,1.0,"Food & Beverage","District 3","Coffee Beans","T0017"],[10,3.75,3.0,"Fashion","District 1","T-Shirt","T0018"],[25,3.86,3.0,"Fashion","District 7","Jacket","T0019"],[15,4.09,1.0,"Fashion","District 3","Backpack","T0020"],[0,4.85,1.0,"Sports","District 3","Yoga Mat","T0021"],[10,4.35,2.0,"Food & Beverage","Thu Duc","Protein Drink","T0022"],[20,4.51,1.0,"Electronics","District 1","Wireless Earbuds","T0023"],[15,4.01,2.0,"Home","District 3","Water Bottle","T0024"],[10,4.27,3.0,"Electronics","District 3","Smart Watch","T0025"],[10,3.39,4.0,"Sports","Thu Duc","Yoga Mat","T0026"],[15,4.54,1.0,"Home","District 1","Kitchen Set","T0027"],[0,4.56,1.0,"Home","District 1","Water Bottle","T0028"],[10,4.12,3.0,"Fashion","District 7","Sneakers","T0029"],[15,3.64,4.0,"Sports","District 7","Sports Bottle","T0030"],[10,4.23,2.0,"Electronics","District 3","Smart Watch","T0031"],[10,4.21,2.0,"Electronics","District 1","Wireless Earbuds","T0032"],[10,4.33,1.0,"Food & Beverage","District 3","Protein Drink","T0033"],[0,4.54,2.0,"Electronics","District 1","Power Bank","T0034"],[10,3.5,3.0,"Electronics","District 1","Smart Watch","T0035"],[10,4.31,2.0,"Home","District 3","Kitchen Set","T0036"],[10,4.11,3.0,"Electronics","District 1","Power Bank","T0037"],[15,3.81,4.0,"Sports","Thu Duc","Yoga Mat","T0038"],[15,4.22,2.0,"Electronics","District 3","Power Bank","T0039"],[20,3.94,2.0,"Electronics","District 7","Wireless Earbuds","T0040"],[5,4.36,3.0,"Fashion","District 7","Jacket","T0041"],[5,3.82,3.0,"Home","District 7","Storage Box","T0042"],[5,4.67,2.0,"Electronics","District 1","Power Bank","T0043"],[25,4.11,2.0,"Sports","District 1","Dumbbell Set","T0044"],[5,4.01,2.0,"Food & Beverage","District 7","Protein Drink","T0045"],[10,3.58,3.0,"Sports","Thu Duc","Running Shoes","T0046"],[25,4.3,2.0,"Electronics","District 1","Smart Watch","T0047"],[10,4.02,3.0,"Electronics","District 7","Power Bank","T0048"],[20,3.94,3.0,"Sports","Thu Duc","Dumbbell Set","T0050"],[5,4.27,3.0,"Electronics","District 3","Smart Watch","T0051"],[15,3.67,3.0,"Fashion","Thu Duc","Jacket","T0052"],[15,4.26,1.0,"Electronics","District 1","Bluetooth Speaker","T0053"],[10,3.91,2.0,"Electronics","District 3","Smart Watch","T0054"],[25,4.17,3.0,"Home","District 1","Desk Lamp","T0055"],[10,4.15,3.0,"Fashion","District 7","Jacket","T0056"],[20,4.03,2.0,"Home","District 7","Storage Box","T0057"],[10,4.04,3.0,"Home","District 3","Kitchen Set","T0058"],[5,4.14,2.0,"Electronics","District 7","Power Bank","T0059"],[10,4.32,3.0,"Sports","Thu Duc","Running Shoes","T0060"],[0,4.2,2.0,"Sports","Thu Duc","Sports Bottle","T0061"],[20,4.04,2.0,"Fashion","District 1","Sneakers","T0062"],[10,4.4,2.0,"Home","District 7","Storage Box","T0063"],[0,4.15,3.0,"Sports","Thu Duc","Sports Bottle","T0064"],[5,4.88,1.0,"Home","District 3","Water Bottle","T0065"],[0,4.19,3.0,"Home","District 3","Storage Box","T0066"],[20,3.52,3.0,"Electronics","Thu Duc","Smart Watch","T0067"],[5,4.36,2.0,"Home","District 7","Water Bottle","T0068"],[5,4.74,1.0,"Food & Beverage","District 1","Protein Drink","T0069"],[5,4.38,1.0,"Food & Beverage","District 1","Coffee Beans","T0070"],[0,4.14,3.0,"Fashion","District 3","Jacket","T0071"],[10,4.27,2.0,"Food & Beverage","Thu Duc","Snack Box","T0072"],[10,3.85,2.0,"Food & Beverage","District 3","Tea Box","T0073"],[5,4.1,3.0,"Fashion","District 3","T-Shirt","T0074"],[35,3.83,2.0,"Food & Beverage","District 1","Protein Drink","T0075"],[0,4.43,1.0,"Sports","District 7","Yoga Mat","T0077"],[5,4.0,2.0,"Fashion","District 3","Jacket","T0078"],[5,4.52,2.0,"Electronics","District 7","Bluetooth Speaker","T0079"],[15,4.93,1.0,"Home","District 3","Storage Box","T0080"],[0,4.56,1.0,"Home","District 1","Storage Box","T0081"],[5,3.74,3.0,"Food & Beverage","District 3","Tea Box","T0082"],[30,3.31,3.0,"Home","Thu Duc","Water Bottle","T0083"],[10,4.13,3.0,"Electronics","District 3","Power Bank","T0084"],[10,4.16,2.0,"Sports","District 3","Sports Bottle","T0085"],[5,3.86,4.0,"Sports","District 7","Sports Bottle","T0086"],[10,3.85,3.0,"Food & Beverage","District 7","Protein Drink","T0087"],[10,4.82,1.0,"Food & Beverage","District 1","Coffee Beans","T0088"],[15,4.17,3.0,"Sports","District 7","Sports Bottle","T0089"],[5,3.9,3.0,"Home","District 7","Storage Box","T0090"],[10,4.38,1.0,"Food & Beverage","District 3","Protein Drink","T0091"],[5,3.89,2.0,"Fashion","District 1","T-Shirt","T0092"],[10,4.37,2.0,"Home","District 1","Desk Lamp","T0093"],[25,3.75,3.0,"Home","District 7","Kitchen Set","T0094"],[20,4.27,2.0,"Sports","District 7","Running Shoes","T0095"],[5,4.33,2.0,"Fashion","Thu Duc","Sneakers","T0096"],[5,3.72,3.0,"Home","Thu Duc","Storage Box","T0097"],[10,4.3,2.0,"Electronics","District 3","Smart Watch","T0098"],[10,4.56,1.0,"Home","District 1","Desk Lamp","T0099"],[25,4.19,2.0,"Electronics","District 1","Power Bank","T0100"],[15,3.54,3.0,"Sports","District 1","Dumbbell Set","T0101"],[10,4.53,2.0,"Sports","District 3","Sports Bottle","T0102"],[10,4.0,3.0,"Home","District 7","Water Bottle","T0103"],[35,4.15,2.0,"Home","District 3","Storage Box","T0104"],[20,4.44,1.0,"Electronics","District 1","Power Bank","T0105"],[15,4.15,3.0,"Fashion","Thu Duc","Jacket","T0106"],[5,4.18,2.0,"Sports","Thu Duc","Sports Bottle","T0107"],[15,3.74,3.0,"Electronics","Thu Duc","Wireless Earbuds","T0108"],[15,4.0,2.0,"Electronics","District 1","Wireless Earbuds","T0109"],[5,4.09,2.0,"Electronics","Thu Duc","Power Bank","T0110"],[15,4.17,3.0,"Electronics","District 3","Bluetooth Speaker","T0111"],[10,4.22,3.0,"Food & Beverage","Thu Duc","Protein Drink","T0112"],[5,4.26,2.0,"Electronics","District 1","Bluetooth Speaker","T0113"],[10,3.79,2.0,"Home","District 3","Desk Lamp","T0114"],[20,3.98,3.0,"Electronics","Thu Duc","Wireless Earbuds","T0115"],[10,3.86,3.0,"Food & Beverage","District 3","Tea Box","T0116"],[15,4.49,2.0,"Fashion","District 7","Sneakers","T0117"],[5,3.92,2.0,"Sports","Thu Duc","Yoga Mat","T0118"],[10,4.62,1.0,"Food & Beverage","District 3","Coffee Beans","T0119"],[5,4.3,2.0,"Food & Beverage","District 1","Snack Box","T0120"],[25,2.85,4.0,"Sports","Thu Duc","Dumbbell Set","T0121"],[5,3.7,3.0,"Food & Beverage","District 3","Snack Box","T0122"],[5,4.1,1.0,"Sports","District 3","Yoga Mat","T0123"],[5,4.77,1.0,"Electronics","District 1","Bluetooth Speaker","T0124"],[5,4.01,3.0,"Food & Beverage","Thu Duc","Snack Box","T0125"],[15,4.47,1.0,"Food & Beverage","District 1","Tea Box","T0126"],[10,4.13,2.0,"Fashion","District 3","Sneakers","T0127"],[20,3.81,NaN,"Electronics","District 1","Smart Watch","T0129"],[5,4.54,2.0,"Fashion","District 3","Sneakers","T0130"],[5,3.83,3.0,"Fashion","District 7","Jacket","T0131"],[25,4.65,1.0,"Fashion","District 1","Backpack","T0132"],[0,4.64,1.0,"Food & Beverage","District 1","Coffee Beans","T0133"],[15,4.04,2.0,"Fashion","District 3","Jacket","T0134"],[15,3.81,3.0,"Home","Thu Duc","Storage Box","T0135"],[10,4.02,3.0,"Sports","District 7","Sports Bottle","T0136"],[10,4.51,3.0,"Fashion","Thu Duc","Jacket","T0137"],[10,3.84,3.0,"Sports","Thu Duc","Running Shoes","T0138"],[5,4.15,2.0,"Food & Beverage","District 1","Coffee Beans","T0139"],[10,4.34,1.0,"Food & Beverage","District 7","Protein Drink","T0140"],[0,3.99,2.0,"Fashion","District 3","Backpack","T0141"],[0,4.61,1.0,"Home","Thu Duc","Water Bottle","T0142"],[20,4.13,3.0,"Fashion","District 7","T-Shirt","T0143"],[10,4.28,2.0,"Food & Beverage","District 1","Tea Box","T0144"],[0,4.92,1.0,"Sports","District 1","Sports Bottle","T0145"],[15,4.65,1.0,"Home","District 7","Storage Box","T0146"],[5,4.42,2.0,"Food & Beverage","District 3","Snack Box","T0147"],[5,4.57,2.0,"Fashion","District 1","Sneakers","T0148"],[5,4.46,1.0,"Fashion","District 1","T-Shirt","T0149"],[10,4.31,2.0,"Electronics","District 1","Bluetooth Speaker","T0150"],[15,4.54,1.0,"Home","District 3","Desk Lamp","T0151"],[20,4.18,3.0,"Food & Beverage","Thu Duc","Snack Box","T0152"],[10,3.77,2.0,"Fashion","Thu Duc","Backpack","T0153"],[5,4.27,2.0,"Fashion","District 7","T-Shirt","T0154"],[15,3.79,3.0,"Electronics","Thu Duc","Wireless Earbuds","T0155"],[10,3.9,3.0,"Home","District 7","Kitchen Set","T0156"],[15,4.67,1.0,"Home","District 7","Water Bottle","T0157"],[5,3.7,4.0,"Home","District 7","Kitchen Set","T0158"],[15,4.39,2.0,"Fashion","District 3","Jacket","T0159"],[20,4.22,NaN,"Sports","Thu Duc","Yoga Mat","T0160"],[5,4.62,2.0,"Food & Beverage","Thu Duc","Protein Drink","T0161"],[30,3.92,2.0,"Food & Beverage","District 3","Snack Box","T0162"],[5,3.8,4.0,"Fashion","District 3","Backpack","T0163"],[10,3.68,4.0,"Fashion","Thu Duc","Sneakers","T0164"],[10,3.85,2.0,"Electronics","District 1","Smart Watch","T0165"],[10,4.48,2.0,"Electronics","District 1","Bluetooth Speaker","T0166"],[0,3.78,3.0,"Electronics","Thu Duc","Smart Watch","T0167"],[25,3.77,4.0,"Home","Thu Duc","Water Bottle","T0168"],[10,4.05,4.0,"Food & Beverage","District 7","Snack Box","T0169"],[20,3.68,2.0,"Food & Beverage","District 1","Snack Box","T0170"],[15,4.61,1.0,"Electronics","District 1","Smart Watch","T0171"],[15,4.05,2.0,"Fashion","District 3","Jacket","T0172"],[25,3.98,2.0,"Home","District 3","Water Bottle","T0173"],[20,3.42,4.0,"Food & Beverage","Thu Duc","Coffee Beans","T0174"],[5,4.27,2.0,"Sports","District 3","Running Shoes","T0175"],[15,3.88,3.0,"Fashion","District 1","T-Shirt","T0176"],[15,4.48,2.0,"Home","District 3","Desk Lamp","T0177"],[15,3.9,3.0,"Home","District 7","Desk Lamp","T0178"],[5,4.61,1.0,"Electronics","Thu Duc","Wireless Earbuds","T0179"],[15,4.12,2.0,"Home","District 7","Kitchen Set","T0180"],[10,3.91,3.0,"Fashion","Thu Duc","Backpack","T0181"],[10,4.08,3.0,"Food & Beverage","District 1","Snack Box","T0183"],[15,4.05,3.0,"Fashion","Thu Duc","Sneakers","T0184"],[0,4.51,1.0,"Fashion","District 7","Backpack","T0185"],[5,4.1,2.0,"Fashion","District 1","T-Shirt","T0186"],[10,4.02,3.0,"Electronics","District 1","Power Bank","T0187"],[5,4.64,2.0,"Sports","District 7","Sports Bottle","T0188"],[10,3.97,2.0,"Electronics","Thu Duc","Smart Watch","T0189"],[5,4.52,2.0,"Food & Beverage","District 1","Snack Box","T0190"],[15,4.03,2.0,"Sports","Thu Duc","Dumbbell Set","T0191"],[5,4.43,1.0,"Home","District 7","Desk Lamp","T0193"],[30,3.81,1.0,"Electronics","Thu Duc","Bluetooth Speaker","T0194"],[15,3.67,3.0,"Home","District 1","Storage Box","T0195"],[5,4.16,2.0,"Fashion","District 3","Backpack","T0196"],[20,3.97,2.0,"Electronics","District 1","Wireless Earbuds","T0197"],[15,4.48,2.0,"Sports","District 1","Sports Bottle","T0198"],[0,4.59,1.0,"Fashion","District 3","T-Shirt","T0199"],[15,4.01,3.0,"Food & Beverage","District 3","Protein Drink","T0200"],[5,4.05,3.0,"Sports","Thu Duc","Yoga Mat","T0201"],[20,3.99,2.0,"Fashion","District 7","Jacket","T0202"],[10,4.4,1.0,"Fashion","District 1","Backpack","T0203"],[5,3.98,2.0,"Electronics","District 1","Wireless Earbuds","T0204"],[5,4.49,2.0,"Sports","District 7","Running Shoes","T0205"],[0,3.76,4.0,"Sports","Thu Duc","Yoga Mat","T0206"],[10,4.3,2.0,"Sports","District 7","Running Shoes","T0207"],[15,4.23,2.0,"Home","District 1","Storage Box","T0208"],[5,4.74,3.0,"Home","Thu Duc","Water Bottle","T0209"],[5,4.44,1.0,"Fashion","District 3","T-Shirt","T0211"],[25,3.81,2.0,"Electronics","District 3","Wireless Earbuds","T0212"],[10,3.99,2.0,"Fashion","District 1","Sneakers","T0213"],[15,4.25,2.0,"Sports","District 1","Dumbbell Set","T0214"],[10,3.88,2.0,"Electronics","District 1","Power Bank","T0215"],[0,4.84,1.0,"Electronics","District 3","Bluetooth Speaker","T0216"],[35,3.58,2.0,"Food & Beverage","Thu Duc","Protein Drink","T0217"],[5,3.83,3.0,"Fashion","Thu Duc","Backpack","T0218"],[20,3.68,2.0,"Fashion","District 7","Backpack","T0219"],[15,4.66,1.0,"Fashion","District 1","Jacket","T0220"],[5,4.78,2.0,"Home","District 3","Water Bottle","T0221"],[10,3.96,3.0,"Fashion","Thu Duc","Backpack","T0222"],[15,4.12,2.0,"Sports","District 7","Sports Bottle","T0223"],[0,4.82,1.0,"Fashion","District 1","T-Shirt","T0224"],[20,3.26,3.0,"Sports","Thu Duc","Running Shoes","T0225"],[10,4.19,2.0,"Electronics","District 1","Smart Watch","T0226"],[20,3.45,4.0,"Home","District 7","Water Bottle","T0227"],[10,4.09,1.0,"Fashion","District 1","Backpack","T0228"],[15,4.45,1.0,"Sports","Thu Duc","Sports Bottle","T0229"],[10,4.41,3.0,"Home","Thu Duc","Storage Box","T0230"],[20,4.34,2.0,"Sports","District 7","Yoga Mat","T0231"],[15,4.37,1.0,"Sports","District 1","Sports Bottle","T0232"],[30,3.36,3.0,"Sports","District 7","Running Shoes","T0233"],[25,3.83,3.0,"Fashion","District 3","T-Shirt","T0234"],[10,3.95,3.0,"Electronics","Thu Duc","Power Bank","T0235"],[5,4.42,2.0,"Sports","District 7","Sports Bottle","T0236"],[5,4.67,2.0,"Food & Beverage","District 1","Protein Drink","T0237"],[15,4.26,2.0,"Fashion","District 7","Sneakers","T0238"],[10,3.94,3.0,"Fashion","District 7","T-Shirt","T0239"],[5,4.68,1.0,"Electronics","District 1","Wireless Earbuds","T0240"]];
+const LEVELS = [0,5,10,15,20,25,30,35];
+const BANDS = [{k:'0–5%',f:d=>d<=5},{k:'10–15%',f:d=>d>=10&&d<=15},{k:'≥ 20%',f:d=>d>=20}];
+const DCOL={1:'#6f9bd8',2:'#9db4e0',3:'#e9a3bd',4:'#d9789b'};
+const fmt = v => v.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+let cat='all', axisMode='zero';
+const cats=[...new Set(ROWS.map(r=>r[3]))].sort();
+const sel=document.getElementById('i3-cat');
+cats.forEach(c=>sel.insertAdjacentHTML('beforeend',`<option value="${c}">${c}</option>`));
+
+function stats(arr){
+  const n=arr.length; if(!n) return null;
+  const m=arr.reduce((a,b)=>a+b,0)/n;
+  const sd=n>1?Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):0;
+  return {m,n,ci:1.96*sd/Math.sqrt(n)};
+}
+function corr(x,y){
+  const n=x.length,mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;
+  let sxy=0,sx=0,sy=0; for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my);sx+=(x[i]-mx)**2;sy+=(y[i]-my)**2;}
+  return sxy/Math.sqrt(sx*sy);
+}
+const data=()=>ROWS.filter(r=>cat==='all'||r[3]===cat);
+
+/* ---------- KPI ---------- */
+function drawKpis(){
+  const d=data(), z=stats(d.filter(r=>r[0]===0).map(r=>r[1])), h=stats(d.filter(r=>r[0]>=20).map(r=>r[1]));
+  const r=corr(d.map(x=>x[0]),d.map(x=>x[1]));
+  document.getElementById('i3-kpis').innerHTML=`
+    <div class="kpi"><b>${z?fmt(z.m):'–'}</b><span>Điểm trung bình, không giảm giá</span></div>
+    <div class="kpi"><b>${h?fmt(h.m):'–'}</b><span>Điểm trung bình, giảm ≥ 20%</span></div>
+    <div class="kpi"><b>${r.toLocaleString('vi-VN',{maximumFractionDigits:2})}</b><span>Tương quan Discount ↔ Rating</span></div>
+    <div class="kpi"><b>${d.length}</b><span>Giao dịch có điểm đánh giá</span></div>`;
+}
+
+/* ---------- Bar + error bar ---------- */
+const bar=echarts.init(document.getElementById('i3-bar'));
+function drawBar(){
+  const d=data();
+  const S=LEVELS.map(l=>stats(d.filter(r=>r[0]===l).map(r=>r[1])));
+  const ok=S.map((s,i)=>s?i:-1).filter(i=>i>=0);
+  const xs=ok.map(i=>LEVELS[i]+'%'), ss=ok.map(i=>S[i]);
+  bar.setOption({
+    animationDuration:500,
+    grid:{left:44,right:14,top:28,bottom:44},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:p=>{
+      const s=ss[p[0].dataIndex];
+      return `<b>Giảm giá ${xs[p[0].dataIndex]}</b><br>Điểm trung bình: <b>${fmt(s.m)}</b><br>KTC 95%: ${fmt(s.m-s.ci)} – ${fmt(s.m+s.ci)}<br>Số giao dịch: ${s.n}${s.n<10?'<br><i style="color:#d9789b">Mẫu nhỏ, cần thận trọng</i>':''}`;}},
+    xAxis:{type:'category',data:xs,name:'Mức giảm giá',nameLocation:'middle',nameGap:28,axisTick:{show:false}},
+    yAxis:{type:'value',min:axisMode==='zero'?0:3,max:5,interval:axisMode==='zero'?1:.5,name:'Điểm (1–5)',
+      nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    series:[
+      {type:'bar',barWidth:'55%',
+        data:ss.map((s,i)=>({value:+s.m.toFixed(2),itemStyle:{color:'#8fa9db',opacity:s.n<10?.38:1,borderRadius:[4,4,0,0]}})),
+        label:{show:true,position:'insideBottom',color:'#2b2f36',fontSize:11,formatter:p=>'n='+ss[p.dataIndex].n},
+        markLine: (()=>{const all=stats(d.map(r=>r[1]));return {symbol:'none',silent:true,
+          lineStyle:{type:'dashed',color:'#656d76'},label:{formatter:'Trung bình chung '+fmt(all.m),position:'insideEndTop',fontSize:11,color:'#656d76'},
+          data:[{yAxis:+all.m.toFixed(2)}]};})()},
+      {type:'custom',silent:true,z:5,
+        renderItem:(p,api)=>{
+          const x=api.value(0),lo=api.coord([x,api.value(1)]),hi=api.coord([x,api.value(2)]),w=6;
+          const st={stroke:'#1f2328',lineWidth:1.4};
+          return {type:'group',children:[
+            {type:'line',shape:{x1:lo[0],y1:lo[1],x2:hi[0],y2:hi[1]},style:st},
+            {type:'line',shape:{x1:lo[0]-w,y1:lo[1],x2:lo[0]+w,y2:lo[1]},style:st},
+            {type:'line',shape:{x1:hi[0]-w,y1:hi[1],x2:hi[0]+w,y2:hi[1]},style:st}]};},
+        data:ss.map((s,i)=>[i,Math.max(s.m-s.ci,0),Math.min(s.m+s.ci,5)])}
+    ]
+  },true);
+}
+
+/* ---------- Line: control for delivery days ---------- */
+const line=echarts.init(document.getElementById('i3-line'));
+function drawLine(){
+  const d=data().filter(r=>r[2]!=null && !Number.isNaN(r[2]));
+  const series=[1,2,3,4].map(dd=>({
+    name:dd+' ngày giao',type:'line',symbolSize:9,smooth:false,
+    lineStyle:{width:2.5,color:DCOL[dd]},itemStyle:{color:DCOL[dd]},emphasis:{focus:'series'},
+    data:BANDS.map(b=>{const s=stats(d.filter(r=>r[2]===dd&&b.f(r[0])).map(r=>r[1]));
+      return s&&s.n>=2?{value:+s.m.toFixed(2),n:s.n}:{value:null,n:s?s.n:0};}),
+    connectNulls:true
+  }));
+  line.setOption({
+    animationDuration:500,
+    grid:{left:44,right:20,top:62,bottom:44},
+    legend:{top:0,itemWidth:14,itemHeight:8,textStyle:{fontSize:12}},
+    tooltip:{trigger:'item',formatter:p=>`<b>${p.seriesName} · giảm ${p.name}</b><br>Điểm trung bình: <b>${fmt(p.value)}</b><br>Số giao dịch: ${p.data.n}`},
+    xAxis:{type:'category',data:BANDS.map(b=>b.k),name:'Nhóm mức giảm giá',nameLocation:'middle',nameGap:28,boundaryGap:true,axisTick:{show:false}},
+    yAxis:{type:'value',min:3,max:5,interval:.5,name:'Điểm trung bình',nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    series
+  },true);
+}
+
+function refresh(){drawKpis();drawBar();drawLine();}
+sel.onchange=e=>{cat=e.target.value;refresh();};
+document.querySelectorAll('#i3-tAxis button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#i3-tAxis button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');axisMode=b.dataset.m;drawBar();});
+refresh();
+addEventListener('resize',()=>{bar.resize();line.resize();});
+
+})();
+</script>
+<script>
+/* ---------- Insight 4: delivery.tpl.html ---------- */
+(()=>{
+
+// [Store, Delivery_Days, Rating] — đã bỏ dòng thiếu dữ liệu
+const ROWS = [["Thu Duc",2,4.43],["District 1",1,4.3],["District 1",3,3.86],["District 1",1,4.71],["District 7",3,4.38],["District 3",2,4.36],["District 7",1,4.49],["Thu Duc",3,4.09],["Thu Duc",3,3.98],["District 3",2,4.51],["District 3",1,4.22],["District 3",2,4.19],["Thu Duc",1,4.21],["District 1",2,4.12],["District 1",2,4.22],["District 3",1,4.25],["District 1",3,3.75],["District 7",3,3.86],["District 3",1,4.09],["District 3",1,4.85],["Thu Duc",2,4.35],["District 1",1,4.51],["District 3",2,4.01],["District 3",3,4.27],["Thu Duc",4,3.39],["District 1",1,4.54],["District 1",1,4.56],["District 7",3,4.12],["District 7",4,3.64],["District 3",2,4.23],["District 1",2,4.21],["District 3",1,4.33],["District 1",2,4.54],["District 1",3,3.5],["District 3",2,4.31],["District 1",3,4.11],["Thu Duc",4,3.81],["District 3",2,4.22],["District 7",2,3.94],["District 7",3,4.36],["District 7",3,3.82],["District 1",2,4.67],["District 1",2,4.11],["District 7",2,4.01],["Thu Duc",3,3.58],["District 1",2,4.3],["District 7",3,4.02],["Thu Duc",3,3.94],["District 3",3,4.27],["Thu Duc",3,3.67],["District 1",1,4.26],["District 3",2,3.91],["District 1",3,4.17],["District 7",3,4.15],["District 7",2,4.03],["District 3",3,4.04],["District 7",2,4.14],["Thu Duc",3,4.32],["Thu Duc",2,4.2],["District 1",2,4.04],["District 7",2,4.4],["Thu Duc",3,4.15],["District 3",1,4.88],["District 3",3,4.19],["Thu Duc",3,3.52],["District 7",2,4.36],["District 1",1,4.74],["District 1",1,4.38],["District 3",3,4.14],["Thu Duc",2,4.27],["District 3",2,3.85],["District 3",3,4.1],["District 1",2,3.83],["District 7",1,4.43],["District 3",2,4.0],["District 7",2,4.52],["District 3",1,4.93],["District 1",1,4.56],["District 3",3,3.74],["Thu Duc",3,3.31],["District 3",3,4.13],["District 3",2,4.16],["District 7",4,3.86],["District 7",3,3.85],["District 1",1,4.82],["District 7",3,4.17],["District 7",3,3.9],["District 3",1,4.38],["District 1",2,3.89],["District 1",2,4.37],["District 7",3,3.75],["District 7",2,4.27],["Thu Duc",2,4.33],["Thu Duc",3,3.72],["District 3",2,4.3],["District 1",1,4.56],["District 1",2,4.19],["District 1",3,3.54],["District 3",2,4.53],["District 7",3,4.0],["District 3",2,4.15],["District 1",1,4.44],["Thu Duc",3,4.15],["Thu Duc",2,4.18],["Thu Duc",3,3.74],["District 1",2,4.0],["Thu Duc",2,4.09],["District 3",3,4.17],["Thu Duc",3,4.22],["District 1",2,4.26],["District 3",2,3.79],["Thu Duc",3,3.98],["District 3",3,3.86],["District 7",2,4.49],["Thu Duc",2,3.92],["District 3",1,4.62],["District 1",2,4.3],["Thu Duc",4,2.85],["District 3",3,3.7],["District 3",1,4.1],["District 1",1,4.77],["Thu Duc",3,4.01],["District 1",1,4.47],["District 3",2,4.13],["District 3",2,4.54],["District 7",3,3.83],["District 1",1,4.65],["District 1",1,4.64],["District 3",2,4.04],["Thu Duc",3,3.81],["District 7",3,4.02],["Thu Duc",3,4.51],["Thu Duc",3,3.84],["District 1",2,4.15],["District 7",1,4.34],["District 3",2,3.99],["Thu Duc",1,4.61],["District 7",3,4.13],["District 1",2,4.28],["District 1",1,4.92],["District 7",1,4.65],["District 3",2,4.42],["District 1",2,4.57],["District 1",1,4.46],["District 1",2,4.31],["District 3",1,4.54],["Thu Duc",3,4.18],["Thu Duc",2,3.77],["District 7",2,4.27],["Thu Duc",3,3.79],["District 7",3,3.9],["District 7",1,4.67],["District 7",4,3.7],["District 3",2,4.39],["Thu Duc",2,4.62],["District 3",2,3.92],["District 3",4,3.8],["Thu Duc",4,3.68],["District 1",2,3.85],["District 1",2,4.48],["Thu Duc",3,3.78],["Thu Duc",4,3.77],["District 7",4,4.05],["District 1",2,3.68],["District 1",1,4.61],["District 3",2,4.05],["District 3",2,3.98],["Thu Duc",4,3.42],["District 3",2,4.27],["District 1",3,3.88],["District 3",2,4.48],["District 7",3,3.9],["Thu Duc",1,4.61],["District 7",2,4.12],["Thu Duc",3,3.91],["District 1",3,4.08],["Thu Duc",3,4.05],["District 7",1,4.51],["District 1",2,4.1],["District 1",3,4.02],["District 7",2,4.64],["Thu Duc",2,3.97],["District 1",2,4.52],["Thu Duc",2,4.03],["District 7",1,4.43],["Thu Duc",1,3.81],["District 1",3,3.67],["District 3",2,4.16],["District 1",2,3.97],["District 1",2,4.48],["District 3",1,4.59],["District 3",3,4.01],["Thu Duc",3,4.05],["District 7",2,3.99],["District 1",1,4.4],["District 1",2,3.98],["District 7",2,4.49],["Thu Duc",4,3.76],["District 7",2,4.3],["District 1",2,4.23],["Thu Duc",3,4.74],["District 3",1,4.44],["District 3",2,3.81],["District 1",2,3.99],["District 1",2,4.25],["District 1",2,3.88],["District 3",1,4.84],["Thu Duc",2,3.58],["Thu Duc",3,3.83],["District 7",2,3.68],["District 1",1,4.66],["District 3",2,4.78],["Thu Duc",3,3.96],["District 7",2,4.12],["District 1",1,4.82],["Thu Duc",3,3.26],["District 1",2,4.19],["District 7",4,3.45],["District 1",1,4.09],["Thu Duc",1,4.45],["Thu Duc",3,4.41],["District 7",2,4.34],["District 1",1,4.37],["District 7",3,3.36],["District 3",3,3.83],["Thu Duc",3,3.95],["District 7",2,4.42],["District 1",2,4.67],["District 7",2,4.26],["District 7",3,3.94],["District 1",1,4.68]];
+const STORES=["District 1","District 3","District 7","Thu Duc"];
+const DAYS=[1,2,3,4];
+const STCOL={"District 1":"#8fa9db","District 3":"#8fcbe3","District 7":"#bba5dc","Thu Duc":"#ec8fad"};
+const DCOL={1:"#9fc0ec",2:"#d3e0f4",3:"#f6cad8",4:"#ec9ab4"};
+const f2=v=>v.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pc=v=>Math.round(v)+'%';
+const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const cell=(s,d)=>ROWS.filter(r=>(!s||r[0]===s)&&(!d||r[1]===d)).map(r=>r[2]);
+let sel=null;
+const op=s=>sel&&sel!==s?.25:1;
+
+// pills
+const pills=document.getElementById('i4-pills');
+['Tất cả',...STORES].forEach(s=>{const b=document.createElement('button');b.textContent=s;
+  b.onclick=()=>{sel=s==='Tất cả'?null:s;refresh();};pills.appendChild(b);});
+
+/* 1. Rating by store */
+const cRating=echarts.init(document.getElementById('i4-rating'));
+function drawRating(){
+  const v=STORES.map(s=>mean(cell(s)));
+  cRating.setOption({grid:{left:44,right:16,top:34,bottom:30},
+    tooltip:{trigger:'item',formatter:p=>`<b>${p.name}</b><br>Điểm trung bình: <b>${f2(p.value)}</b><br>Số đơn: ${cell(p.name).length}`},
+    xAxis:{type:'category',data:STORES,axisTick:{show:false}},
+    yAxis:{type:'value',min:1,max:5,interval:1,name:'Điểm',nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    series:[{type:'bar',barWidth:'50%',
+      data:v.map((x,i)=>({value:+x.toFixed(2),itemStyle:{color:STCOL[STORES[i]],opacity:op(STORES[i]),borderRadius:[5,5,0,0]}})),
+      label:{show:true,position:'top',fontWeight:600,formatter:p=>f2(p.value)}}]},true);
+}
+cRating.on('click',p=>{sel=sel===p.name?null:p.name;refresh();});
+
+/* 2. Delivery mix */
+const cMix=echarts.init(document.getElementById('i4-mix'));
+function drawMix(){
+  cMix.setOption({grid:{left:80,right:16,top:36,bottom:28},
+    legend:{top:0,left:0,itemWidth:12,itemHeight:12,textStyle:{fontSize:12}},
+    tooltip:{trigger:'item',formatter:p=>{const n=cell(p.name,+p.seriesName[0]).length;return `<b>${p.name} · ${p.seriesName}</b><br>${n} đơn (${pc(p.value)})`;}},
+    xAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    yAxis:{type:'category',data:STORES,inverse:true,axisTick:{show:false}},
+    series:DAYS.map(d=>({name:d+' ngày',type:'bar',stack:'a',barWidth:'55%',
+      itemStyle:{color:DCOL[d],borderColor:'#fff',borderWidth:1},
+      label:{show:true,color:'#2b2f36',fontSize:11,formatter:p=>p.value>=9?pc(p.value):''},
+      data:STORES.map(s=>({value:+(cell(s,d).length/cell(s).length*100).toFixed(1),itemStyle:{opacity:op(s)}}))}))},true);
+}
+cMix.on('click',p=>{sel=sel===p.name?null:p.name;refresh();});
+
+/* 3. Lines */
+const cLines=echarts.init(document.getElementById('i4-lines'));
+function drawLines(){
+  cLines.setOption({grid:{left:44,right:16,top:36,bottom:40},
+    legend:{top:0,itemWidth:14,itemHeight:8,textStyle:{fontSize:12}},
+    tooltip:{trigger:'item',formatter:p=>`<b>${p.seriesName} · giao ${p.name}</b><br>Điểm trung bình: <b>${f2(p.value)}</b><br>Số đơn: ${p.data.n}${p.data.n<5?'<br><i style="color:#d9789b">Mẫu nhỏ, cần thận trọng</i>':''}`},
+    xAxis:{type:'category',data:DAYS.map(d=>d+' ngày'),name:'Số ngày giao',nameLocation:'middle',nameGap:26,axisTick:{show:false}},
+    yAxis:{type:'value',min:3.4,max:4.6,interval:.2,name:'Điểm',nameTextStyle:{align:'left'},axisLabel:{formatter:v=>v.toFixed(1)},splitLine:{lineStyle:{color:'#eee'}}},
+    series:STORES.map(s=>({name:s,type:'line',symbolSize:sel===s?11:8,
+      lineStyle:{width:sel===s?4:2.5,color:STCOL[s],opacity:op(s)},itemStyle:{color:STCOL[s],opacity:op(s)},
+      emphasis:{focus:'series'},z:sel===s?5:2,
+      connectNulls:false,data:DAYS.map(d=>{const c=cell(s,d);return {value:c.length>=3?+mean(c).toFixed(2):null,n:c.length,symbol:c.length<5?'diamond':'emptyCircle',symbolSize:c.length<5?11:(sel===s?11:8)};})}))},true);
+}
+
+/* 4. Low ratings */
+const cLow=echarts.init(document.getElementById('i4-low'));
+function drawLow(){
+  const src=sel?ROWS.filter(r=>r[0]===sel):ROWS;
+  cLow.setOption({grid:{left:44,right:16,top:30,bottom:40},
+    title:{text:sel?sel:'Toàn chuỗi',right:0,top:0,textStyle:{fontSize:12,color:'#656d76',fontWeight:500}},
+    tooltip:{trigger:'item',formatter:p=>`<b>Giao ${p.name}</b><br>${p.data.k}/${p.data.n} đơn bị chấm dưới 3,8 (${pc(p.value)})`},
+    xAxis:{type:'category',data:DAYS.map(d=>d+' ngày'),name:'Số ngày giao',nameLocation:'middle',nameGap:26,axisTick:{show:false}},
+    yAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    series:[{type:'bar',barWidth:'50%',
+      data:DAYS.map(d=>{const c=src.filter(r=>r[1]===d);const k=c.filter(r=>r[2]<3.8).length;
+        return {value:c.length?+(k/c.length*100).toFixed(1):0,k,n:c.length,itemStyle:{color:DCOL[d],borderRadius:[5,5,0,0]}};}),
+      label:{show:true,position:'top',fontWeight:600,formatter:p=>p.data.n?pc(p.value)+'  (n='+p.data.n+')':'không có đơn'}}]},true);
+}
+
+function refresh(){
+  [...pills.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',(sel||'Tất cả')===b.textContent));
+  drawRating();drawMix();drawLines();drawLow();
+}
+refresh();
+addEventListener('resize',()=>[cRating,cMix,cLines,cLow].forEach(c=>c.resize()));
+
+})();
+</script>
+<script>
+/* ---------- Insight 5: weekend.tpl.html ---------- */
+(()=>{
+
+// [Store, Customer_Type, Day_of_Week, Revenue, Category, Product] — 240 giao dịch
+const ROWS = [["Thu Duc","Office Worker","Sunday",738000,"Home","Water Bottle"],["District 1","Office Worker","Thursday",665600,"Electronics","Wireless Earbuds"],["District 1","Office Worker","Wednesday",672000,"Electronics","Power Bank"],["District 1","Student","Monday",287000,"Fashion","T-Shirt"],["District 7","Office Worker","Wednesday",705600,"Sports","Dumbbell Set"],["District 3","Tourist","Thursday",487900,"Fashion","T-Shirt"],["District 7","Family","Wednesday",415800,"Home","Desk Lamp"],["Thu Duc","Student","Wednesday",862600,"Home","Water Bottle"],["Thu Duc","Family","Friday",324700,"Food & Beverage","Coffee Beans"],["District 3","Tourist","Monday",591850,"Fashion","Backpack"],["District 3","Family","Saturday",316800,"Sports","Yoga Mat"],["District 3","Student","Saturday",499500,"Fashion","Backpack"],["Thu Duc","Student","Tuesday",760500,"Electronics","Wireless Earbuds"],["District 1","Tourist","Sunday",334400,"Home","Desk Lamp"],["District 1","Family","Friday",375300,"Home","Desk Lamp"],["District 1","Tourist","Thursday",928800,"Sports","Yoga Mat"],["District 3","Office Worker","Thursday",154800,"Food & Beverage","Coffee Beans"],["District 1","Office Worker","Wednesday",261000,"Fashion","T-Shirt"],["District 7","Family","Monday",2209500,"Fashion","Jacket"],["District 3","Family","Thursday",594150,"Fashion","Backpack"],["District 3","Office Worker","Tuesday",714000,"Sports","Yoga Mat"],["Thu Duc","Student","Sunday",199800,"Food & Beverage","Protein Drink"],["District 1","Family","Wednesday",1348800,"Electronics","Wireless Earbuds"],["District 3","Office Worker","Friday",930750,"Home","Water Bottle"],["District 3","Office Worker","Monday",1455300,"Electronics","Smart Watch"],["Thu Duc","Office Worker","Friday",1173600,"Sports","Yoga Mat"],["District 1","Student","Sunday",1540200,"Home","Kitchen Set"],["District 1","Family","Monday",1065000,"Home","Water Bottle"],["District 7","Office Worker","Tuesday",1068300,"Fashion","Sneakers"],["District 7","Office Worker","Wednesday",428400,"Sports","Sports Bottle"],["District 3","Family","Thursday",1438200,"Electronics","Smart Watch"],["District 1","Office Worker","Tuesday",2594700,"Electronics","Wireless Earbuds"],["District 3","Family","Wednesday",355500,"Food & Beverage","Protein Drink"],["District 1","Student","Saturday",854000,"Electronics","Power Bank"],["District 1","Office Worker","Monday",1359000,"Electronics","Smart Watch"],["District 3","Tourist","Tuesday",523800,"Home","Kitchen Set"],["District 1","Student","Saturday",406800,"Electronics","Power Bank"],["Thu Duc","Tourist","Wednesday",615400,"Sports","Yoga Mat"],["District 3","Family","Thursday",387600,"Electronics","Power Bank"],["District 7","Office Worker","Friday",5382400,"Electronics","Wireless Earbuds"],["District 7","Student","Wednesday",1696700,"Fashion","Jacket"],["District 7","Office Worker","Tuesday",296400,"Home","Storage Box"],["District 1","Family","Tuesday",912000,"Electronics","Power Bank"],["District 1","Family","Friday",657750,"Sports","Dumbbell Set"],["District 7","Office Worker","Tuesday",254600,"Food & Beverage","Protein Drink"],["Thu Duc","Office Worker","Tuesday",1147500,"Sports","Running Shoes"],["District 1","Family","Saturday",1122750,"Electronics","Smart Watch"],["District 7","Student","Tuesday",831600,"Electronics","Power Bank"],["Thu Duc","Student","Wednesday",391000,"Electronics","Power Bank"],["Thu Duc","Student","Wednesday",634400,"Sports","Dumbbell Set"],["District 3","Office Worker","Sunday",1424050,"Electronics","Smart Watch"],["Thu Duc","Student","Saturday",731000,"Fashion","Jacket"],["District 1","Student","Thursday",1866600,"Electronics","Bluetooth Speaker"],["District 3","Office Worker","Wednesday",1327500,"Electronics","Smart Watch"],["District 1","Tourist","Thursday",306750,"Home","Desk Lamp"],["District 7","Office Worker","Tuesday",884700,"Fashion","Jacket"],["District 7","Student","Thursday",120800,"Home","Storage Box"],["District 3","Family","Tuesday",522000,"Home","Kitchen Set"],["District 7","Tourist","Wednesday",887300,"Electronics","Power Bank"],["Thu Duc","Office Worker","Friday",3669300,"Sports","Running Shoes"],["Thu Duc","Family","Thursday",235000,"Sports","Sports Bottle"],["District 1","Family","Monday",1772800,"Fashion","Sneakers"],["District 7","Tourist","Sunday",742500,"Home","Storage Box"],["Thu Duc","Student","Thursday",765000,"Sports","Sports Bottle"],["District 3","Family","Friday",198550,"Home","Water Bottle"],["District 3","Student","Wednesday",628000,"Home","Storage Box"],["Thu Duc","Family","Friday",1196800,"Electronics","Smart Watch"],["District 7","Office Worker","Monday",208050,"Home","Water Bottle"],["District 1","Tourist","Tuesday",538650,"Food & Beverage","Protein Drink"],["District 1","Student","Wednesday",330600,"Food & Beverage","Coffee Beans"],["District 3","Tourist","Saturday",832000,"Fashion","Jacket"],["Thu Duc","Office Worker","Saturday",82800,"Food & Beverage","Snack Box"],["District 3","Family","Monday",114300,"Food & Beverage","Tea Box"],["District 3","Office Worker","Sunday",583300,"Fashion","T-Shirt"],["District 1","Office Worker","Sunday",237250,"Food & Beverage","Protein Drink"],["District 7","Office Worker","Saturday",478800,"Sports","Sports Bottle"],["District 7","Family","Thursday",365000,"Sports","Yoga Mat"],["District 3","Family","Tuesday",993700,"Fashion","Jacket"],["District 7","Office Worker","Thursday",1087750,"Electronics","Bluetooth Speaker"],["District 3","Family","Wednesday",139400,"Home","Storage Box"],["District 1","Family","Wednesday",164000,"Home","Storage Box"],["District 3","Office Worker","Saturday",122550,"Food & Beverage","Tea Box"],["Thu Duc","Office Worker","Thursday",129500,"Home","Water Bottle"],["District 3","Office Worker","Sunday",414900,"Electronics","Power Bank"],["District 3","Student","Saturday",233100,"Sports","Sports Bottle"],["District 7","Office Worker","Monday",469300,"Sports","Sports Bottle"],["District 7","Office Worker","Wednesday",170100,"Food & Beverage","Protein Drink"],["District 1","Office Worker","Friday",333000,"Food & Beverage","Coffee Beans"],["District 7","Family","Friday",782000,"Sports","Sports Bottle"],["District 7","Student","Friday",305900,"Home","Storage Box"],["District 3","Family","Monday",126000,"Food & Beverage","Protein Drink"],["District 1","Student","Monday",266950,"Fashion","T-Shirt"],["District 1","Tourist","Saturday",1497600,"Home","Desk Lamp"],["District 7","Family","Wednesday",429000,"Home","Kitchen Set"],["District 7","Student","Sunday",998400,"Sports","Running Shoes"],["Thu Duc","Family","Thursday",1150450,"Fashion","Sneakers"],["Thu Duc","Tourist","Wednesday",313500,"Home","Storage Box"],["District 3","Office Worker","Sunday",1469700,"Electronics","Smart Watch"],["District 1","Student","Sunday",382500,"Home","Desk Lamp"],["District 1","Office Worker","Monday",323250,"Electronics","Power Bank"],["District 1","Family","Tuesday",679150,"Sports","Dumbbell Set"],["District 3","Student","Tuesday",892800,"Sports","Sports Bottle"],["District 7","Tourist","Sunday",631800,"Home","Water Bottle"],["District 3","Office Worker","Wednesday",382200,"Home","Storage Box"],["District 1","Tourist","Monday",332800,"Electronics","Power Bank"],["Thu Duc","Family","Monday",5349900,"Fashion","Jacket"],["Thu Duc","Tourist","Sunday",440800,"Sports","Sports Bottle"],["Thu Duc","Family","Wednesday",2277150,"Electronics","Wireless Earbuds"],["District 1","Office Worker","Thursday",735250,"Electronics","Wireless Earbuds"],["Thu Duc","Family","Sunday",409450,"Electronics","Power Bank"],["District 3","Family","Wednesday",938400,"Electronics","Bluetooth Speaker"],["Thu Duc","Office Worker","Monday",144000,"Food & Beverage","Protein Drink"],["District 1","Student","Tuesday",1019350,"Electronics","Bluetooth Speaker"],["District 3","Student","Saturday",1989000,"Home","Desk Lamp"],["Thu Duc","Tourist","Thursday",1364800,"Electronics","Wireless Earbuds"],["District 3","Family","Tuesday",305100,"Food & Beverage","Tea Box"],["District 7","Office Worker","Tuesday",941800,"Fashion","Sneakers"],["Thu Duc","Office Worker","Tuesday",321100,"Sports","Yoga Mat"],["District 3","Family","Monday",304200,"Food & Beverage","Coffee Beans"],["District 1","Office Worker","Wednesday",87400,"Food & Beverage","Snack Box"],["Thu Duc","Tourist","Sunday",618000,"Sports","Dumbbell Set"],["District 3","Office Worker","Thursday",171000,"Food & Beverage","Snack Box"],["District 3","Office Worker","Friday",308750,"Sports","Yoga Mat"],["District 1","Office Worker","Tuesday",1007000,"Electronics","Bluetooth Speaker"],["Thu Duc","Family","Sunday",265050,"Food & Beverage","Snack Box"],["District 1","Office Worker","Tuesday",200600,"Food & Beverage","Tea Box"],["District 3","Tourist","Thursday",1103400,"Fashion","Sneakers"],["Thu Duc","Tourist","Friday",1489500,"Electronics","Smart Watch"],["District 1","Student","Sunday",1224000,"Electronics","Smart Watch"],["District 3","Tourist","Tuesday",1147600,"Fashion","Sneakers"],["District 7","Family","Tuesday",935750,"Fashion","Jacket"],["District 1","Student","Saturday",471000,"Fashion","Backpack"],["District 1","Student","Saturday",1062000,"Food & Beverage","Coffee Beans"],["District 3","Student","Thursday",842350,"Fashion","Jacket"],["Thu Duc","Student","Wednesday",523600,"Home","Storage Box"],["District 7","Office Worker","Saturday",231300,"Sports","Sports Bottle"],["Thu Duc","Office Worker","Sunday",874800,"Fashion","Jacket"],["Thu Duc","Student","Friday",1192500,"Sports","Running Shoes"],["District 1","Student","Tuesday",172900,"Food & Beverage","Coffee Beans"],["District 7","Office Worker","Thursday",72000,"Food & Beverage","Protein Drink"],["District 3","Student","Sunday",637000,"Fashion","Backpack"],["Thu Duc","Office Worker","Monday",440000,"Home","Water Bottle"],["District 7","Office Worker","Tuesday",655200,"Fashion","T-Shirt"],["District 1","Family","Wednesday",207000,"Food & Beverage","Tea Box"],["District 1","Family","Tuesday",249000,"Sports","Sports Bottle"],["District 7","Student","Sunday",270300,"Home","Storage Box"],["District 3","Student","Friday",267900,"Food & Beverage","Snack Box"],["District 1","Tourist","Friday",1015550,"Fashion","Sneakers"],["District 1","Student","Thursday",837900,"Fashion","T-Shirt"],["District 1","Office Worker","Friday",1060200,"Electronics","Bluetooth Speaker"],["District 3","Office Worker","Monday",379100,"Home","Desk Lamp"],["Thu Duc","Student","Friday",237600,"Food & Beverage","Snack Box"],["Thu Duc","Student","Wednesday",1168200,"Fashion","Backpack"],["District 7","Office Worker","Wednesday",1010800,"Fashion","T-Shirt"],["Thu Duc","Family","Wednesday",661300,"Electronics","Wireless Earbuds"],["District 7","Office Worker","Saturday",1549800,"Home","Kitchen Set"],["District 7","Office Worker","Saturday",609450,"Home","Water Bottle"],["District 7","Family","Monday",553850,"Home","Kitchen Set"],["District 3","Office Worker","Friday",732700,"Fashion","Jacket"],["Thu Duc","Office Worker","Saturday",585600,"Sports","Yoga Mat"],["Thu Duc","Student","Tuesday",136800,"Food & Beverage","Protein Drink"],["District 3","Family","Wednesday",403200,"Food & Beverage","Snack Box"],["District 3","Office Worker","Saturday",591850,"Fashion","Backpack"],["Thu Duc","Office Worker","Friday",1170000,"Fashion","Sneakers"],["District 1","Family","Thursday",1422900,"Electronics","Smart Watch"],["District 1","Office Worker","Saturday",1003500,"Electronics","Bluetooth Speaker"],["Thu Duc","Office Worker","Tuesday",3556000,"Electronics","Smart Watch"],["Thu Duc","Student","Wednesday",331500,"Home","Water Bottle"],["District 7","Office Worker","Saturday",163800,"Food & Beverage","Snack Box"],["District 1","Tourist","Saturday",509600,"Food & Beverage","Snack Box"],["District 1","Student","Wednesday",1422050,"Electronics","Smart Watch"],["District 3","Office Worker","Wednesday",776900,"Fashion","Jacket"],["District 3","Office Worker","Wednesday",342000,"Home","Water Bottle"],["Thu Duc","Student","Monday",544000,"Food & Beverage","Coffee Beans"],["District 3","Office Worker","Saturday",1253050,"Sports","Running Shoes"],["District 1","Student","Monday",430100,"Fashion","T-Shirt"],["District 3","Student","Tuesday",336600,"Home","Desk Lamp"],["District 7","Student","Tuesday",1093950,"Home","Desk Lamp"],["Thu Duc","Student","Thursday",815100,"Electronics","Wireless Earbuds"],["District 7","Family","Friday",984300,"Home","Kitchen Set"],["Thu Duc","Office Worker","Thursday",579600,"Fashion","Backpack"],["District 7","Student","Friday",617400,"Fashion","T-Shirt"],["District 1","Family","Thursday",414000,"Food & Beverage","Snack Box"],["Thu Duc","Family","Saturday",991100,"Fashion","Sneakers"],["District 7","Office Worker","Sunday",582000,"Fashion","Backpack"],["District 1","Student","Tuesday",243200,"Fashion","T-Shirt"],["District 1","Student","Sunday",1252800,"Electronics","Power Bank"],["District 7","Office Worker","Wednesday",247950,"Sports","Sports Bottle"],["Thu Duc","Family","Friday",1377900,"Electronics","Smart Watch"],["District 1","Student","Friday",345800,"Food & Beverage","Snack Box"],["Thu Duc","Student","Tuesday",696150,"Sports","Dumbbell Set"],["District 1","Office Worker","Wednesday",135000,"Food & Beverage","Protein Drink"],["District 7","Office Worker","Tuesday",765700,"Home","Desk Lamp"],["Thu Duc","Family","Tuesday",814800,"Electronics","Bluetooth Speaker"],["District 1","Office Worker","Monday",139400,"Home","Storage Box"],["District 3","Office Worker","Friday",1149500,"Fashion","Backpack"],["District 1","Family","Saturday",1384000,"Electronics","Wireless Earbuds"],["District 1","Family","Sunday",215050,"Sports","Sports Bottle"],["District 3","Family","Friday",582000,"Fashion","T-Shirt"],["District 3","Family","Thursday",124100,"Food & Beverage","Protein Drink"],["Thu Duc","Office Worker","Monday",615600,"Sports","Yoga Mat"],["District 7","Office Worker","Wednesday",812800,"Fashion","Jacket"],["District 1","Student","Friday",570600,"Fashion","Backpack"],["District 1","Office Worker","Thursday",2308500,"Electronics","Wireless Earbuds"],["District 7","Office Worker","Tuesday",1298650,"Sports","Running Shoes"],["Thu Duc","Office Worker","Friday",385000,"Sports","Yoga Mat"],["District 7","Office Worker","Saturday",1224000,"Sports","Running Shoes"],["District 1","Student","Monday",275400,"Home","Storage Box"],["Thu Duc","Student","Tuesday",862600,"Home","Water Bottle"],["District 1","Family","Sunday",819400,"Fashion","Jacket"],["District 3","Student","Sunday",256500,"Fashion","T-Shirt"],["District 3","Family","Saturday",643500,"Electronics","Wireless Earbuds"],["District 1","Family","Sunday",995400,"Fashion","Sneakers"],["District 1","Family","Monday",1392300,"Sports","Dumbbell Set"],["District 1","Office Worker","Monday",855000,"Electronics","Power Bank"],["District 3","Tourist","Tuesday",1073000,"Electronics","Bluetooth Speaker"],["Thu Duc","Student","Saturday",50050,"Food & Beverage","Protein Drink"],["Thu Duc","Office Worker","Wednesday",1176100,"Fashion","Backpack"],["District 7","Office Worker","Saturday",510400,"Fashion","Backpack"],["District 1","Office Worker","Tuesday",774350,"Fashion","Jacket"],["District 3","Student","Sunday",204250,"Home","Water Bottle"],["Thu Duc","Office Worker","Monday",1768500,"Fashion","Backpack"],["District 7","Family","Tuesday",219300,"Sports","Sports Bottle"],["District 1","Student","Saturday",263000,"Fashion","T-Shirt"],["Thu Duc","Office Worker","Monday",1128800,"Sports","Running Shoes"],["District 1","Student","Saturday",1478700,"Electronics","Smart Watch"],["District 7","Tourist","Saturday",1427200,"Home","Water Bottle"],["District 1","Tourist","Thursday",1207800,"Fashion","Backpack"],["Thu Duc","Family","Friday",846600,"Sports","Sports Bottle"],["Thu Duc","Family","Monday",1467000,"Home","Storage Box"],["District 7","Family","Wednesday",842400,"Sports","Yoga Mat"],["District 1","Student","Wednesday",1011500,"Sports","Sports Bottle"],["District 7","Office Worker","Tuesday",846300,"Sports","Running Shoes"],["District 3","Tourist","Friday",879000,"Fashion","T-Shirt"],["Thu Duc","Office Worker","Monday",429300,"Electronics","Power Bank"],["District 7","Office Worker","Tuesday",755250,"Sports","Sports Bottle"],["District 1","Student","Sunday",133000,"Food & Beverage","Protein Drink"],["District 7","Family","Wednesday",1030200,"Fashion","Sneakers"],["District 7","Office Worker","Wednesday",266400,"Fashion","T-Shirt"],["District 1","Family","Wednesday",881600,"Electronics","Wireless Earbuds"]];
+const STORES=["District 1","District 3","District 7","Thu Duc"];
+const CTYPES=["Student","Tourist","Office Worker","Family"];
+const CATS=["Electronics","Fashion","Sports","Home","Food & Beverage"];
+const CTCOL={"Student":"#8fb8de","Tourist":"#9fd6c6","Office Worker":"#f2b8a6","Family":"#d2bfe8"};
+const CATCOL={"Electronics":"#9db4e0","Fashion":"#f5b8cf","Sports":"#a6d8ee","Home":"#cdb9e6","Food & Beverage":"#f3dc95"};
+const STCOL={"District 1":"#8fa9db","District 3":"#8fcbe3","District 7":"#bba5dc","Thu Duc":"#ec8fad"};
+const isWE=d=>d==="Saturday"||d==="Sunday";
+const DAYS={wd:5,we:2};
+const tr=v=>(v/1e6).toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})+' tr';
+const k=v=>Math.round(v/1e3).toLocaleString('vi-VN')+'k';
+const pc=v=>(v>0?'+':'')+Math.round(v)+'%';
+let selStore="District 1", selCT=null;
+
+function agg(f){const r=ROWS.filter(f);return {n:r.length,rev:r.reduce((a,x)=>a+x[3],0)};}
+function perDay(store,ct){
+  const base=x=>(!store||x[0]===store)&&(!ct||x[1]===ct);
+  const a=agg(x=>base(x)&&!isWE(x[2])), b=agg(x=>base(x)&&isWE(x[2]));
+  return {wd:a.rev/DAYS.wd, we:b.rev/DAYS.we, nwd:a.n, nwe:b.n};
+}
+
+/* ---- 1. Slope chart ---- */
+const slope=echarts.init(document.getElementById('i5-slope'));
+function drawSlope(){
+  const series=STORES.map(s=>{const p=perDay(s);const on=s===selStore;
+    return {name:s,type:'line',data:[+(p.wd/1e6).toFixed(2),+(p.we/1e6).toFixed(2)],
+      symbolSize:on?12:8,lineStyle:{width:on?4:2,color:STCOL[s],opacity:on?1:.45},
+      itemStyle:{color:STCOL[s],opacity:on?1:.5},
+      endLabel:{show:true,formatter:p=>`${s}  ${pc((perDay(s).we/perDay(s).wd-1)*100)}`,
+        color:on?'#1f2328':'#656d76',fontWeight:on?700:400,fontSize:12},
+      emphasis:{focus:'series'},z:on?5:2};});
+  slope.setOption({
+    animationDuration:500,
+    grid:{left:52,right:130,top:36,bottom:30},
+    tooltip:{trigger:'item',formatter:p=>{if(!STORES.includes(p.seriesName))return'';const d=perDay(p.seriesName);
+      return `<b>${p.seriesName}</b><br>Ngày thường: ${tr(d.wd)}/ngày (${d.nwd} đơn)<br>Cuối tuần: ${tr(d.we)}/ngày (${d.nwe} đơn)<br>Thay đổi: <b>${pc((d.we/d.wd-1)*100)}</b>`;}},
+    xAxis:{type:'category',data:['Ngày thường','Cuối tuần'],boundaryGap:['8%','8%'],axisTick:{show:false},axisLabel:{fontSize:12,interval:0}},
+    yAxis:{type:'value',name:'tr VND / ngày',min:0,nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    series
+  },true);
+}
+slope.on('click',p=>{if(STORES.includes(p.seriesName)){selStore=p.seriesName;refresh();}});
+
+/* ---- 2. Customer type grouped bar (per day) ---- */
+const ctype=echarts.init(document.getElementById('i5-ctype'));
+const pills=document.getElementById('i5-pills');
+STORES.forEach(s=>{const b=document.createElement('button');b.textContent=s;b.onclick=()=>{selStore=s;refresh();};pills.appendChild(b);});
+function drawCtype(){
+  [...pills.children].forEach(b=>b.classList.toggle('on',b.textContent===selStore));
+  const d=CTYPES.map(c=>perDay(selStore,c));
+  const mk=(key,name,col)=>({name,type:'bar',itemStyle:{color:col},barGap:'10%',barWidth:'32%',
+    data:d.map((x,i)=>({value:+(x[key]/1e6).toFixed(2),itemStyle:{color:col,opacity:selCT&&selCT!==CTYPES[i]?.3:1,borderRadius:[4,4,0,0]}})),
+    label:{show:true,position:'top',fontSize:11,color:'#656d76',formatter:p=>p.value?p.value.toLocaleString('vi-VN'):'0'}});
+  ctype.setOption({
+    animationDuration:400,
+    grid:{left:44,right:10,top:34,bottom:30},
+    legend:{top:0,right:0,itemWidth:12,itemHeight:12,textStyle:{fontSize:12}},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:p=>{const i=p[0].dataIndex,x=d[i];
+      const ch=x.wd?pc((x.we/x.wd-1)*100):'–';
+      return `<b>${selStore} · ${CTYPES[i]}</b><br>Ngày thường: ${tr(x.wd)}/ngày (${x.nwd} đơn)<br>Cuối tuần: ${tr(x.we)}/ngày (${x.nwe} đơn)<br>Thay đổi: <b>${ch}</b>`;}},
+    xAxis:{type:'category',data:CTYPES,axisTick:{show:false}},
+    yAxis:{type:'value',name:'tr / ngày',nameTextStyle:{align:'left'},splitLine:{lineStyle:{color:'#eee'}}},
+    series:[mk('wd','Ngày thường','#dfe3ea'),mk('we','Cuối tuần','#8fa9db')]
+  },true);
+}
+
+/* ---- 3a. KPI decomposition ---- */
+function drawKpis(){
+  const r=ROWS.filter(x=>x[0]===selStore);
+  const wd=r.filter(x=>!isWE(x[2])), we=r.filter(x=>isWE(x[2]));
+  const s=a=>a.reduce((t,x)=>t+x[3],0);
+  const m=[
+    ['Doanh thu / ngày', s(wd)/5, s(we)/2, tr],
+    ['Số đơn / ngày', wd.length/5, we.length/2, v=>v.toLocaleString('vi-VN',{maximumFractionDigits:1})],
+    ['Giá trị đơn trung bình', s(wd)/wd.length, s(we)/we.length, v=>(v/1e6).toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2})+' tr']];
+  document.getElementById('i5-kpis').innerHTML=m.map(([l,a,b,f])=>{const c=(b/a-1)*100;
+    return `<div class="kpi"><div class="lbl">${l}</div><div class="val">${f(a)} → ${f(b)} <span class="chg ${c>=0?'up':'down'}">${pc(c)}</span></div></div>`;}).join('');
+  document.getElementById('i5-selName').textContent=selStore;
+  document.getElementById('i5-selName2').textContent=selStore;
+}
+
+/* ---- 3b. Weekend share by customer type ---- */
+const share=echarts.init(document.getElementById('i5-share'));
+function drawShare(){
+  const v=CTYPES.map(c=>{const r=ROWS.filter(x=>x[1]===c);return {p:r.filter(x=>isWE(x[2])).length/r.length*100,n:r.length};});
+  const order=CTYPES.map((c,i)=>i).sort((a,b)=>v[b].p-v[a].p);
+  share.setOption({
+    title:{text:'% giao dịch vào cuối tuần',textStyle:{fontSize:13,fontWeight:600},left:0,top:0},
+    grid:{left:96,right:44,top:34,bottom:20},
+    tooltip:{trigger:'item',formatter:p=>`<b>${p.name}</b><br>${p.value.toFixed(1)}% giao dịch vào cuối tuần<br>(${v[CTYPES.indexOf(p.name)].n} giao dịch)<br><i>Bấm để làm nổi bật ở bước 2</i>`},
+    xAxis:{type:'value',max:50,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    yAxis:{type:'category',inverse:true,data:order.map(i=>CTYPES[i]),axisTick:{show:false}},
+    series:[{type:'bar',barWidth:'55%',
+      data:order.map(i=>({value:+v[i].p.toFixed(1),itemStyle:{color:CTCOL[CTYPES[i]],opacity:selCT&&selCT!==CTYPES[i]?.3:1,borderRadius:[0,4,4,0]}})),
+      label:{show:true,position:'right',formatter:'{c}%',fontSize:11},
+      markLine:{symbol:'none',silent:true,lineStyle:{type:'dashed',color:'#656d76'},
+        label:{show:false},data:[{xAxis:28.6}]}}]
+  },true);
+}
+share.on('click',p=>{selCT=selCT===p.name?null:p.name;drawShare();drawCtype();});
+
+/* ---- 3c. Category mix weekday vs weekend for store ---- */
+const cat=echarts.init(document.getElementById('i5-cat'));
+function drawCat(){
+  const r=ROWS.filter(x=>x[0]===selStore);
+  const grp=[r.filter(x=>!isWE(x[2])),r.filter(x=>isWE(x[2]))];
+  cat.setOption({
+    title:{text:`Cơ cấu danh mục (số đơn) · ${selStore}`,textStyle:{fontSize:13,fontWeight:600},left:0,top:0},
+    grid:{left:96,right:16,top:58,bottom:24},
+    legend:{top:22,left:0,itemWidth:10,itemHeight:10,textStyle:{fontSize:11}},
+    tooltip:{trigger:'item',formatter:p=>{const g=grp[p.dataIndex];const n=g.filter(x=>x[4]===p.seriesName).length;
+      return `<b>${p.name} · ${p.seriesName}</b><br>${n}/${g.length} đơn (${p.value}%)`;}},
+    xAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:'#eee'}}},
+    yAxis:{type:'category',inverse:true,data:['Ngày thường','Cuối tuần'],axisTick:{show:false}},
+    series:CATS.map(c=>({name:c,type:'bar',stack:'a',barWidth:'50%',
+      itemStyle:{color:CATCOL[c],borderColor:'#fff',borderWidth:1},
+      label:{show:true,color:'#2b2f36',fontSize:11,formatter:p=>p.value>=12?Math.round(p.value)+'%':''},
+      data:grp.map(g=>+(g.filter(x=>x[4]===c).length/g.length*100).toFixed(1))}))
+  },true);
+}
+
+function refresh(){drawSlope();drawCtype();drawKpis();drawShare();drawCat();}
+refresh();
+addEventListener('resize',()=>[slope,ctype,share,cat].forEach(c=>c.resize()));
+
+})();
+</script>
+<script>
+/* điều hướng: đánh dấu mục đang xem */
+(()=>{const links=[...document.querySelectorAll('nav a')];const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));
+  const on=document.querySelector('nav a.on');if(on){const c=document.querySelector('nav .in');c.scrollTo({left:on.offsetLeft-60,behavior:'smooth'});}}});},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>s&&io.observe(s));})();
+</script>
+</body>
+</html>
